@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Socket.IO Client Test</title>
+  </head>
+  <body>
+    <h1>Socket.IO Test</h1>
+    <p>Check the console for connection status.</p>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    <script>
+      const socket = io("http://localhost:5000", {
+        transports: ["websocket"], // Sử dụng WebSocket để tránh vấn đề CORS với polling
+        upgrade: false, // Không nâng cấp từ polling
+      });
+
+      socket.on("connect", () => {
+        console.log("Connected to server");
+
+        // Emit a 'reply-invite' message to the server
+        socket.emit("reply-invite", {
+          message: "Hello from client",
+        });
+      });
+
+      // Listen for 'notifications-66f129c2ce17b4fe18136f52' messages from the server
+      socket.on("new-noti-6797d4f34ee4675eb7791e13", (data) => {
+        console.log("Received notification from server:", data);
+      });
+
+      // Listen for 'notifications-66f129c2ce17b4fe18136f52' messages from the server
+      socket.on("user-info-6797d4f34ee4675eb7791e13", (data) => {
+        console.log("Received notification from server:", data);
+      });
+
+      // Listen for 'messages' messages from the server
+      socket.on("messages", (data) => {
+        console.log("Received message from server:", data);
+      });
+
+      socket.on("disconnect", () => {
+        console.log("Disconnected from server");
+      });
+    </script>
+  </body>
+</html>

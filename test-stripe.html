@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Stripe Payment Method</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <!-- Stripe.js -->
+    <style>
+      /* Style cho form */
+      .form {
+        width: 400px;
+        margin: 100px auto;
+      }
+
+      .form input,
+      .form button {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+      }
+
+      #card-element {
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="form">
+      <h2>Test Create Payment Method</h2>
+      <form id="payment-form">
+        <label for="card-element">Credit or debit card</label>
+        <div id="card-element"><!-- Stripe Elements sẽ render tại đây --></div>
+        <button id="submit">Submit Payment</button>
+      </form>
+      <div id="payment-result"></div>
+      <!-- Kết quả sẽ hiển thị tại đây -->
+    </div>
+
+    <script>
+      // Khởi tạo Stripe
+      const stripe = Stripe(
+        "pk_test_51Q698N08DRPrFzp8NvybWrYPm1zxm6QfedM9sVDn0i1eAeqfYJZTRquelv6luNIhkMj9ym1RFwEBpsDCxPnWRjro00fszvd3b9"
+      );
+
+      // Khởi tạo các phần tử của Stripe Elements
+      const elements = stripe.elements();
+      const cardElement = elements.create("card"); // Tạo phần tử thẻ
+      cardElement.mount("#card-element"); // Gắn phần tử thẻ vào HTML
+
+      // Xử lý sự kiện submit form
+      const form = document.getElementById("payment-form");
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        // Tạo Payment Method từ thông tin thẻ của người dùng
+        const { paymentMethod, error } = await stripe.createPaymentMethod({
+          type: "card",
+          card: cardElement,
+        });
+
+        if (error) {
+          // Xử lý lỗi
+          document.getElementById(
+            "payment-result"
+          ).textContent = `Error: ${error.message}`;
+        } else {
+          // Nếu thành công, hiển thị Payment Method ID
+          document.getElementById(
+            "payment-result"
+          ).textContent = `Payment Method ID: ${paymentMethod.id}`;
+          console.log(paymentMethod); // Log ra toàn bộ thông tin Payment Method
+        }
+      });
+    </script>
+  </body>
+</html>
