@@ -25,6 +25,99 @@ const {
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Service:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Service ID
+ *         cameraman_id:
+ *           type: string
+ *           description: Cameraman ID
+ *         title:
+ *           type: string
+ *           description: Service title
+ *         amount:
+ *           type: number
+ *           description: Service price
+ *         styles:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Photography styles
+ *         categories:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Service categories
+ *         areas:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Service areas
+ *         video_demo_urls:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Video demo URLs
+ *         date_get_job:
+ *           type: string
+ *           format: date
+ *           description: Available date for job
+ *         time_of_day:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Available time slots
+ *         status:
+ *           type: string
+ *           enum: [pending, approved, rejected]
+ *           description: Service status
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     ServiceResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Service'
+ *         pagination:
+ *           type: object
+ *           properties:
+ *             pageIndex:
+ *               type: integer
+ *             pageSize:
+ *               type: integer
+ *             totalPages:
+ *               type: integer
+ *             totalResults:
+ *               type: integer
+ *     FreeSlotsResponse:
+ *       type: object
+ *       properties:
+ *         availableSlots:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: List of available time slots
+ *     ErrorResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *         error:
+ *           type: string
+ */
+
+/**
+ * @swagger
  * /api/services:
  *   get:
  *     summary: Get all services with filtering and pagination
@@ -70,8 +163,16 @@ const {
  *     responses:
  *       200:
  *         description: List of services
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ServiceResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *   post:
  *     summary: Create a new service (Cameraman only)
  *     tags: [Services]
@@ -134,10 +235,22 @@ const {
  *     responses:
  *       201:
  *         description: Service created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Service'
  *       400:
  *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       403:
  *         description: Forbidden - Only cameramen can create services
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 serviceRouter.route("/").get(getAllServices).post(validateTokenCameraman, createService);
 
@@ -157,8 +270,16 @@ serviceRouter.route("/").get(getAllServices).post(validateTokenCameraman, create
  *     responses:
  *       200:
  *         description: Service details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Service'
  *       404:
  *         description: Service not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *   put:
  *     summary: Update service by ID (Owner or Admin only)
  *     tags: [Services]
@@ -195,10 +316,22 @@ serviceRouter.route("/").get(getAllServices).post(validateTokenCameraman, create
  *     responses:
  *       200:
  *         description: Service updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Service'
  *       403:
  *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Service not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *   delete:
  *     summary: Disable service by ID (Owner or Admin only)
  *     tags: [Services]
@@ -214,10 +347,25 @@ serviceRouter.route("/").get(getAllServices).post(validateTokenCameraman, create
  *     responses:
  *       200:
  *         description: Service disabled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *       403:
  *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Service not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 serviceRouter.route("/:id").get(getServiceById).put(validateToken, updateServiceById).delete(validateToken, disableServiceById);
 
@@ -239,10 +387,22 @@ serviceRouter.route("/:id").get(getServiceById).put(validateToken, updateService
  *     responses:
  *       200:
  *         description: Service approved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Service'
  *       403:
  *         description: Forbidden - Admin only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Service not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 serviceRouter.patch("/:id/approve", validateTokenAdmin, approveServiceById);
 
@@ -276,12 +436,28 @@ serviceRouter.patch("/:id/approve", validateTokenAdmin, approveServiceById);
  *     responses:
  *       200:
  *         description: Service rejected successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Service'
  *       400:
  *         description: Rejection reason required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       403:
  *         description: Forbidden - Admin only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Service not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 serviceRouter.patch("/:id/reject", validateTokenAdmin, rejectServiceById);
 
@@ -311,8 +487,16 @@ serviceRouter.patch("/:id/reject", validateTokenAdmin, rejectServiceById);
  *     responses:
  *       200:
  *         description: List of free slots
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/FreeSlotsResponse'
  *       404:
  *         description: Service not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 serviceRouter.post("/free-slots", getFreeSlot);
 

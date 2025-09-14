@@ -18,6 +18,68 @@ const loginLimiter = require("../app/middleware/loginLimiter");
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: User ID
+ *         email:
+ *           type: string
+ *           format: email
+ *         full_name:
+ *           type: string
+ *         phone_number:
+ *           type: string
+ *         role_name:
+ *           type: string
+ *           enum: [ADMIN, CUSTOMER, CAMERAMAN]
+ *         is_verified:
+ *           type: boolean
+ *         status:
+ *           type: string
+ *           enum: [ACTIVE, BLOCKED]
+ *         membership:
+ *           type: string
+ *           enum: [NORMAL, ONE_MONTH, SIX_MONTH]
+ *         membership_expires_at:
+ *           type: string
+ *           format: date-time
+ *         account_balance:
+ *           type: number
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     LoginResponse:
+ *       type: object
+ *       properties:
+ *         accessToken:
+ *           type: string
+ *         user:
+ *           $ref: '#/components/schemas/User'
+ *     RegisterResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *         user:
+ *           $ref: '#/components/schemas/User'
+ *     ErrorResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *         error:
+ *           type: string
+ */
+
+/**
+ * @swagger
  * /api/auth/register:
  *   post:
  *     summary: Register a new user
@@ -47,8 +109,16 @@ const loginLimiter = require("../app/middleware/loginLimiter");
  *     responses:
  *       200:
  *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RegisterResponse'
  *       400:
  *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 authRouter.route("/register").post(registerUser);
 
@@ -79,18 +149,31 @@ authRouter.route("/register").post(registerUser);
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 accessToken:
- *                   type: string
+ *               $ref: '#/components/schemas/LoginResponse'
  *       400:
  *         description: All fields must not be empty
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       401:
  *         description: Email or Password is not Valid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 authRouter.route("/login").post(loginLimiter, login);
 
@@ -107,29 +190,42 @@ authRouter.route("/login").post(loginLimiter, login);
  *           schema:
  *             type: object
  *             required:
- *               - email
- *               - password
+ *               - token
  *             properties:
  *               token:
  *                 type: string
+ *                 description: Google OAuth token
  *     responses:
  *       200:
  *         description: Successful login
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 accessToken:
- *                   type: string
+ *               $ref: '#/components/schemas/LoginResponse'
  *       400:
  *         description: All fields must not be empty
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       401:
  *         description: Email or Password is not Valid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 authRouter.route("/loginGoogle").post(loginLimiter, loginGoogle);
 
@@ -153,6 +249,10 @@ authRouter.route("/loginGoogle").post(loginLimiter, loginGoogle);
  *         description: No Content (no cookie to clear)
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 authRouter.route("/logout").post(logout);
 
@@ -177,10 +277,25 @@ authRouter.route("/logout").post(logout);
  *     responses:
  *       200:
  *         description: Email verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *       400:
  *         description: Invalid or expired token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 authRouter.route("/verify-email").post(verifyEmail);
 

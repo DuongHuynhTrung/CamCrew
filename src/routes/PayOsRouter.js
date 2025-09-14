@@ -45,17 +45,25 @@ const { validateToken } = require("../app/middleware/validateTokenHandler");
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 paymentUrl:
- *                   type: string
- *                   description: PayOS checkout URL
+ *               $ref: '#/components/schemas/PaymentUrlResponse'
  *       400:
  *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       403:
  *         description: Forbidden - Customer only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 payOsRouter.post(
   "/create-buy-services",
@@ -114,54 +122,28 @@ payOsRouter.post(
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 paymentUrl:
- *                   type: string
- *                   description: PayOS checkout URL
+ *               $ref: '#/components/schemas/PaymentUrlResponse'
  *       400:
  *         description: Invalid input or slot already taken
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Customer or artist not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 payOsRouter.post("/create-schedule", validateToken, createSchedulePayOsUrl);
 
-/**
- * @swagger
- * /api/payos/callback:
- *   post:
- *     summary: PayOS webhook callback for payment processing
- *     tags: [PayOS]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - code
- *               - data
- *             properties:
- *               code:
- *                 type: string
- *                 description: Payment result code
- *               data:
- *                 type: object
- *                 properties:
- *                   amount:
- *                     type: number
- *                   orderCode:
- *                     type: number
- *     responses:
- *       200:
- *         description: Payment processed successfully
- *       404:
- *         description: Transaction not found
- *       500:
- *         description: Internal Server Error
- */
 payOsRouter.post("/callback", payOsCallBack);
 
 module.exports = payOsRouter;

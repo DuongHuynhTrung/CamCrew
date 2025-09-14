@@ -24,6 +24,83 @@ const {
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Review:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Review ID
+ *         customer_id:
+ *           type: string
+ *           description: Customer ID
+ *         cameraman_id:
+ *           type: string
+ *           description: Cameraman ID
+ *         rating:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 5
+ *           description: Rating from 1 to 5
+ *         comment:
+ *           type: string
+ *           description: Review comment
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     ReviewResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Review'
+ *         pagination:
+ *           type: object
+ *           properties:
+ *             pageIndex:
+ *               type: integer
+ *             pageSize:
+ *               type: integer
+ *             totalPages:
+ *               type: integer
+ *             totalResults:
+ *               type: integer
+ *     ReviewStatistics:
+ *       type: object
+ *       properties:
+ *         totalReviews:
+ *           type: integer
+ *         averageRating:
+ *           type: number
+ *         ratingDistribution:
+ *           type: object
+ *           properties:
+ *             "1":
+ *               type: integer
+ *             "2":
+ *               type: integer
+ *             "3":
+ *               type: integer
+ *             "4":
+ *               type: integer
+ *             "5":
+ *               type: integer
+ *     ErrorResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *         error:
+ *           type: string
+ */
+
+/**
+ * @swagger
  * /api/reviews:
  *   get:
  *     summary: Get all reviews with pagination and filtering
@@ -61,8 +138,16 @@ const {
  *     responses:
  *       200:
  *         description: List of reviews
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ReviewResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *   post:
  *     summary: Create a new review (Customer only)
  *     tags: [Reviews]
@@ -96,10 +181,22 @@ const {
  *     responses:
  *       201:
  *         description: Review created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Review'
  *       400:
  *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       403:
  *         description: Forbidden - Only customers can create reviews
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 reviewRouter.route("/").get(getAllReviews).post(validateTokenCustomer, createReview);
 
@@ -119,8 +216,16 @@ reviewRouter.route("/").get(getAllReviews).post(validateTokenCustomer, createRev
  *     responses:
  *       200:
  *         description: Review details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Review'
  *       404:
  *         description: Review not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *   put:
  *     summary: Update review by ID (Owner only)
  *     tags: [Reviews]
@@ -149,10 +254,22 @@ reviewRouter.route("/").get(getAllReviews).post(validateTokenCustomer, createRev
  *     responses:
  *       200:
  *         description: Review updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Review'
  *       403:
  *         description: Forbidden - Can only update own reviews
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Review not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *   delete:
  *     summary: Delete review by ID (Owner only)
  *     tags: [Reviews]
@@ -168,10 +285,25 @@ reviewRouter.route("/").get(getAllReviews).post(validateTokenCustomer, createRev
  *     responses:
  *       200:
  *         description: Review deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *       403:
  *         description: Forbidden - Can only delete own reviews
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Review not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 reviewRouter.route("/:id").get(getReviewById).put(validateTokenCustomer, updateReviewById).delete(validateTokenCustomer, deleteReviewById);
 
@@ -203,8 +335,16 @@ reviewRouter.route("/:id").get(getReviewById).put(validateTokenCustomer, updateR
  *     responses:
  *       200:
  *         description: List of reviews for the cameraman
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ReviewResponse'
  *       404:
  *         description: Cameraman not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 reviewRouter.get("/cameraman/:cameraman_id", getReviewsByCameraman);
 
@@ -238,10 +378,22 @@ reviewRouter.get("/cameraman/:cameraman_id", getReviewsByCameraman);
  *     responses:
  *       200:
  *         description: List of reviews by the customer
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ReviewResponse'
  *       403:
  *         description: Forbidden - Can only access own reviews
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Customer not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 reviewRouter.get("/customer/:customer_id", validateTokenCustomer, getReviewsByCustomer);
 
@@ -264,27 +416,13 @@ reviewRouter.get("/customer/:customer_id", validateTokenCustomer, getReviewsByCu
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 totalReviews:
- *                   type: integer
- *                 averageRating:
- *                   type: number
- *                 ratingDistribution:
- *                   type: object
- *                   properties:
- *                     "1":
- *                       type: integer
- *                     "2":
- *                       type: integer
- *                     "3":
- *                       type: integer
- *                     "4":
- *                       type: integer
- *                     "5":
- *                       type: integer
+ *               $ref: '#/components/schemas/ReviewStatistics'
  *       404:
  *         description: Cameraman not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 reviewRouter.get("/cameraman/:cameraman_id/stats", getReviewStatsByCameraman);
 

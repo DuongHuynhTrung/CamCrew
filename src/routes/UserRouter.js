@@ -48,6 +48,9 @@ const {
  *         - email
  *         - password
  *       properties:
+ *         _id:
+ *           type: string
+ *           description: User ID
  *         full_name:
  *           type: string
  *           maxLength: 255
@@ -80,13 +83,28 @@ const {
  *           type: string
  *           default: "NORMAL"
  *           description: "User's rank (e.g., NORMAL, ADMIN)"
- *         role:
+ *         role_name:
  *           type: string
+ *           enum: [ADMIN, CUSTOMER, CAMERAMAN]
  *           description: "User's role in the application"
  *         status:
+ *           type: string
+ *           enum: [ACTIVE, BLOCKED]
+ *           description: "User account status"
+ *         membership:
+ *           type: string
+ *           enum: [NORMAL, ONE_MONTH, SIX_MONTH]
+ *           description: "User's membership level"
+ *         membership_expires_at:
+ *           type: string
+ *           format: date-time
+ *           description: "Membership expiration date"
+ *         account_balance:
+ *           type: number
+ *           description: "User's account balance"
+ *         is_verified:
  *           type: boolean
- *           default: true
- *           description: "Indicates if the user account is active"
+ *           description: "Email verification status"
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -95,6 +113,40 @@ const {
  *           type: string
  *           format: date-time
  *           description: "User account last update timestamp"
+ *     UserResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/User'
+ *         pagination:
+ *           type: object
+ *           properties:
+ *             pageIndex:
+ *               type: integer
+ *             pageSize:
+ *               type: integer
+ *             totalPages:
+ *               type: integer
+ *             totalResults:
+ *               type: integer
+ *     PaymentUrlResponse:
+ *       type: object
+ *       properties:
+ *         paymentUrl:
+ *           type: string
+ *           description: PayOS checkout URL
+ *         orderCode:
+ *           type: number
+ *           description: Order code for tracking
+ *     ErrorResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *         error:
+ *           type: string
  */
 
 /**
@@ -251,8 +303,16 @@ userRouter.route("/admin/:id").put(validateTokenAdmin, updateUserInfoForAdmin);
  *     responses:
  *       200:
  *         description: List of all users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserResponse'
  *       403:
  *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *   put:
  *     summary: Update user
  *     tags: [Users]
@@ -303,8 +363,16 @@ userRouter.route("/").get(getUsers).put(updateUsers);
  *     responses:
  *       200:
  *         description: Current user's information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
  *       404:
  *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 userRouter.get("/current", currentUser);
 
@@ -604,18 +672,19 @@ userRouter.post("/upMembershipByAccountBalance", upMembershipByAccountBalance);
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 paymentUrl:
- *                   type: string
- *                   description: PayOS checkout URL
- *                 orderCode:
- *                   type: number
- *                   description: Order code for tracking
+ *               $ref: '#/components/schemas/PaymentUrlResponse'
  *       400:
  *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       403:
  *         description: Forbidden - Only cameramen can upgrade membership
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 userRouter.post("/membership-subscription", validateTokenCameraman, createMembershipSubscriptionPayment);
 
@@ -670,25 +739,13 @@ userRouter.post("/check-subscriptions", validateTokenAdmin, manualCheckSubscript
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                 pagination:
- *                   type: object
- *                   properties:
- *                     pageIndex:
- *                       type: integer
- *                     pageSize:
- *                       type: integer
- *                     totalPages:
- *                       type: integer
- *                     totalResults:
- *                       type: integer
+ *               $ref: '#/components/schemas/UserResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 userRouter.get("/cameramen", getCameramen);
 

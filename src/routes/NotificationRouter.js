@@ -23,6 +23,67 @@ const {
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Notification:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Notification ID
+ *         user_id:
+ *           type: string
+ *           description: User ID
+ *         type:
+ *           type: string
+ *           description: Notification type
+ *         content:
+ *           type: string
+ *           description: Notification content
+ *         isRead:
+ *           type: boolean
+ *           description: Read status
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     NotificationResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Notification'
+ *         pagination:
+ *           type: object
+ *           properties:
+ *             pageIndex:
+ *               type: integer
+ *             pageSize:
+ *               type: integer
+ *             totalPages:
+ *               type: integer
+ *             totalResults:
+ *               type: integer
+ *     UnreadCountResponse:
+ *       type: object
+ *       properties:
+ *         count:
+ *           type: integer
+ *           description: Number of unread notifications
+ *     ErrorResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *         error:
+ *           type: string
+ */
+
+/**
+ * @swagger
  * /api/notifications:
  *   get:
  *     summary: Get all notifications for current user
@@ -55,8 +116,16 @@ const {
  *     responses:
  *       200:
  *         description: List of notifications
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/NotificationResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *   post:
  *     summary: Create a new notification (Admin only)
  *     tags: [Notifications]
@@ -85,10 +154,22 @@ const {
  *     responses:
  *       201:
  *         description: Notification created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Notification'
  *       400:
  *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       403:
  *         description: Forbidden - Admin only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 notificationRouter.route("/").get(validateToken, getNotifications).post(validateTokenAdmin, createNotification);
 
@@ -110,10 +191,22 @@ notificationRouter.route("/").get(validateToken, getNotifications).post(validate
  *     responses:
  *       200:
  *         description: Notification details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Notification'
  *       403:
  *         description: Forbidden - Can only access own notifications
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Notification not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *   put:
  *     summary: Update notification by ID
  *     tags: [Notifications]
@@ -139,10 +232,22 @@ notificationRouter.route("/").get(validateToken, getNotifications).post(validate
  *     responses:
  *       200:
  *         description: Notification updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Notification'
  *       403:
  *         description: Forbidden - Can only update own notifications
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Notification not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *   delete:
  *     summary: Delete notification by ID
  *     tags: [Notifications]
@@ -158,10 +263,25 @@ notificationRouter.route("/").get(validateToken, getNotifications).post(validate
  *     responses:
  *       200:
  *         description: Notification deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *       403:
  *         description: Forbidden - Can only delete own notifications
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Notification not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 notificationRouter.route("/:id").get(validateToken, getNotificationById).put(validateToken, updateNotification).delete(validateToken, deleteNotification);
 
@@ -176,8 +296,19 @@ notificationRouter.route("/:id").get(validateToken, getNotificationById).put(val
  *     responses:
  *       200:
  *         description: All notifications marked as read
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 notificationRouter.patch("/mark-all-read", validateToken, markAllAsRead);
 
@@ -195,13 +326,13 @@ notificationRouter.patch("/mark-all-read", validateToken, markAllAsRead);
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 count:
- *                   type: integer
- *                   description: Number of unread notifications
+ *               $ref: '#/components/schemas/UnreadCountResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 notificationRouter.get("/unread-count", validateToken, getUnreadCount);
 

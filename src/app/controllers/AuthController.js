@@ -54,7 +54,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
     );
 
     // Tạo link xác thực
-    const verifyLink = `${process.env.CLIENT_URL || "https://camcrew.vercel.app"}/verify-email?token=${verifyToken}`;
+    const verifyLink = `${process.env.CLIENT_URL || "https://camcrew.vercel.app"}/verify&upn=${verifyToken}`;
 
     // Đọc file verify_form.html và thay thế các thông tin
     const templatePath = path.join(__dirname, "../../views/verify_form.html");

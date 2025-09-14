@@ -21,6 +21,88 @@ const {
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Payment:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Payment ID
+ *         user_id:
+ *           type: string
+ *           description: User ID
+ *         amount:
+ *           type: number
+ *           description: Payment amount
+ *         status:
+ *           type: string
+ *           enum: [processing, paid, failed, cancelled]
+ *           description: Payment status
+ *         type:
+ *           type: string
+ *           enum: [booking, membership, service]
+ *           description: Payment type
+ *         orderCode:
+ *           type: number
+ *           description: Order code
+ *         description:
+ *           type: string
+ *           description: Payment description
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     PaymentResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Payment'
+ *         pagination:
+ *           type: object
+ *           properties:
+ *             pageIndex:
+ *               type: integer
+ *             pageSize:
+ *               type: integer
+ *             totalPages:
+ *               type: integer
+ *             totalResults:
+ *               type: integer
+ *     PaymentStatistics:
+ *       type: object
+ *       properties:
+ *         totalPayments:
+ *           type: integer
+ *         totalAmount:
+ *           type: number
+ *         successfulPayments:
+ *           type: integer
+ *         failedPayments:
+ *           type: integer
+ *         pendingPayments:
+ *           type: integer
+ *         averageAmount:
+ *           type: number
+ *         paymentTypeDistribution:
+ *           type: object
+ *         statusDistribution:
+ *           type: object
+ *     ErrorResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *         error:
+ *           type: string
+ */
+
+/**
+ * @swagger
  * /api/payments:
  *   get:
  *     summary: Get all payments with filtering (Admin only)
@@ -70,10 +152,22 @@ const {
  *     responses:
  *       200:
  *         description: List of payments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PaymentResponse'
  *       403:
  *         description: Forbidden - Admin only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 paymentRouter.get("/", validateTokenAdmin, getPayments);
 
@@ -128,8 +222,16 @@ paymentRouter.get("/", validateTokenAdmin, getPayments);
  *     responses:
  *       200:
  *         description: List of user's payments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PaymentResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 paymentRouter.get("/my-payments", validateToken, getMyPayments);
 
@@ -151,10 +253,22 @@ paymentRouter.get("/my-payments", validateToken, getMyPayments);
  *     responses:
  *       200:
  *         description: Payment details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Payment'
  *       403:
  *         description: Forbidden - Can only access own payments or admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Payment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *   put:
  *     summary: Update payment status (Admin only)
  *     tags: [Payments]
@@ -182,12 +296,28 @@ paymentRouter.get("/my-payments", validateToken, getMyPayments);
  *     responses:
  *       200:
  *         description: Payment status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Payment'
  *       400:
  *         description: Invalid status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       403:
  *         description: Forbidden - Admin only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Payment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 paymentRouter.route("/:id").get(validateToken, getPaymentById).put(validateTokenAdmin, updatePaymentStatus);
 
@@ -218,28 +348,19 @@ paymentRouter.route("/:id").get(validateToken, getPaymentById).put(validateToken
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 totalPayments:
- *                   type: integer
- *                 totalAmount:
- *                   type: number
- *                 successfulPayments:
- *                   type: integer
- *                 failedPayments:
- *                   type: integer
- *                 pendingPayments:
- *                   type: integer
- *                 averageAmount:
- *                   type: number
- *                 paymentTypeDistribution:
- *                   type: object
- *                 statusDistribution:
- *                   type: object
+ *               $ref: '#/components/schemas/PaymentStatistics'
  *       403:
  *         description: Forbidden - Admin only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 paymentRouter.get("/statistics", validateTokenAdmin, getPaymentStatistics);
 

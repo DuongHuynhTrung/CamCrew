@@ -25,6 +25,80 @@ const {
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Report:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Report ID
+ *         customer_id:
+ *           type: string
+ *           description: Customer ID
+ *         cameraman_id:
+ *           type: string
+ *           description: Cameraman ID
+ *         content:
+ *           type: string
+ *           description: Report content
+ *         status:
+ *           type: string
+ *           enum: [pending, resolved, rejected]
+ *           description: Report status
+ *         admin_notes:
+ *           type: string
+ *           description: Admin notes
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     ReportResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Report'
+ *         pagination:
+ *           type: object
+ *           properties:
+ *             pageIndex:
+ *               type: integer
+ *             pageSize:
+ *               type: integer
+ *             totalPages:
+ *               type: integer
+ *             totalResults:
+ *               type: integer
+ *     ReportStatistics:
+ *       type: object
+ *       properties:
+ *         totalReports:
+ *           type: integer
+ *         pendingReports:
+ *           type: integer
+ *         resolvedReports:
+ *           type: integer
+ *         rejectedReports:
+ *           type: integer
+ *         reportTypeDistribution:
+ *           type: object
+ *         statusDistribution:
+ *           type: object
+ *     ErrorResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *         error:
+ *           type: string
+ */
+
+/**
+ * @swagger
  * /api/reports:
  *   get:
  *     summary: Get all reports with filtering (Admin only)
@@ -57,10 +131,22 @@ const {
  *     responses:
  *       200:
  *         description: List of reports
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ReportResponse'
  *       403:
  *         description: Forbidden - Admin only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *   post:
  *     summary: Create a new report
  *     tags: [Reports]
@@ -89,10 +175,22 @@ const {
  *     responses:
  *       201:
  *         description: Report created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Report'
  *       400:
  *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 reportRouter.route("/").get(validateTokenAdmin, getAllReports).post(validateToken, createReport);
 
@@ -114,10 +212,22 @@ reportRouter.route("/").get(validateTokenAdmin, getAllReports).post(validateToke
  *     responses:
  *       200:
  *         description: Report details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Report'
  *       403:
  *         description: Forbidden - Can only access own reports or admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Report not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *   put:
  *     summary: Update report status (Admin only)
  *     tags: [Reports]
@@ -148,12 +258,28 @@ reportRouter.route("/").get(validateTokenAdmin, getAllReports).post(validateToke
  *     responses:
  *       200:
  *         description: Report status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Report'
  *       400:
  *         description: Invalid status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       403:
  *         description: Forbidden - Admin only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Report not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *   delete:
  *     summary: Delete report by ID (Owner or Admin only)
  *     tags: [Reports]
@@ -169,10 +295,25 @@ reportRouter.route("/").get(validateTokenAdmin, getAllReports).post(validateToke
  *     responses:
  *       200:
  *         description: Report deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *       403:
  *         description: Forbidden - Can only delete own reports or admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Report not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 reportRouter.route("/:id").get(validateToken, getReportById).put(validateTokenAdmin, updateReportStatus).delete(validateToken, deleteReportById);
 
@@ -206,10 +347,22 @@ reportRouter.route("/:id").get(validateToken, getReportById).put(validateTokenAd
  *     responses:
  *       200:
  *         description: List of reports by the customer
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ReportResponse'
  *       403:
  *         description: Forbidden - Can only access own reports or admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Customer not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 reportRouter.get("/customer/:customer_id", validateToken, getReportsByCustomer);
 
@@ -243,10 +396,22 @@ reportRouter.get("/customer/:customer_id", validateToken, getReportsByCustomer);
  *     responses:
  *       200:
  *         description: List of reports by the cameraman
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ReportResponse'
  *       403:
  *         description: Forbidden - Can only access own reports or admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Cameraman not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 reportRouter.get("/cameraman/:cameraman_id", validateToken, getReportsByCameraman);
 
@@ -280,10 +445,22 @@ reportRouter.get("/cameraman/:cameraman_id", validateToken, getReportsByCamerama
  *     responses:
  *       200:
  *         description: List of reports with the specified status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ReportResponse'
  *       403:
  *         description: Forbidden - Admin only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 reportRouter.get("/status/:status", validateTokenAdmin, getReportsByStatus);
 
@@ -301,24 +478,19 @@ reportRouter.get("/status/:status", validateTokenAdmin, getReportsByStatus);
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 totalReports:
- *                   type: integer
- *                 pendingReports:
- *                   type: integer
- *                 resolvedReports:
- *                   type: integer
- *                 rejectedReports:
- *                   type: integer
- *                 reportTypeDistribution:
- *                   type: object
- *                 statusDistribution:
- *                   type: object
+ *               $ref: '#/components/schemas/ReportStatistics'
  *       403:
  *         description: Forbidden - Admin only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 reportRouter.get("/statistics", validateTokenAdmin, getReportStats);
 

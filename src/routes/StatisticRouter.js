@@ -20,6 +20,81 @@ const {
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     UserStatistics:
+ *       type: object
+ *       properties:
+ *         totalCustomer:
+ *           type: integer
+ *           description: Total number of customers
+ *         totalArtist:
+ *           type: integer
+ *           description: Total number of artists
+ *     SalesStatistics:
+ *       type: object
+ *       properties:
+ *         income:
+ *           type: object
+ *           properties:
+ *             totalIncomeCurrent:
+ *               type: number
+ *             totalIncomePrevious:
+ *               type: number
+ *             difference:
+ *               type: number
+ *         newCustomers:
+ *           type: object
+ *           properties:
+ *             totalNewCustomerCurrent:
+ *               type: integer
+ *             totalNewCustomerPrevious:
+ *               type: integer
+ *             difference:
+ *               type: integer
+ *         newArtists:
+ *           type: object
+ *           properties:
+ *             totalNewArtistCurrent:
+ *               type: integer
+ *             totalNewArtistPrevious:
+ *               type: integer
+ *             difference:
+ *               type: integer
+ *     MonthlyStatistics:
+ *       type: object
+ *       properties:
+ *         countTransactions:
+ *           type: array
+ *           items:
+ *             type: integer
+ *           description: Transaction count for each month
+ *         totalAmount:
+ *           type: array
+ *           items:
+ *             type: number
+ *           description: Total amount for each month
+ *         countCustomers:
+ *           type: array
+ *           items:
+ *             type: integer
+ *           description: Customer count for each month
+ *         countArtists:
+ *           type: array
+ *           items:
+ *             type: integer
+ *           description: Artist count for each month
+ *     ErrorResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *         error:
+ *           type: string
+ */
+
+/**
+ * @swagger
  * /api/statistics/users:
  *   get:
  *     summary: Get user statistics (Admin only)
@@ -32,18 +107,19 @@ const {
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 totalCustomer:
- *                   type: integer
- *                   description: Total number of customers
- *                 totalArtist:
- *                   type: integer
- *                   description: Total number of artists
+ *               $ref: '#/components/schemas/UserStatistics'
  *       403:
  *         description: Forbidden - Admin only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 statisticRouter.get("/users", validateTokenAdmin, statisticUsers);
 
@@ -61,39 +137,19 @@ statisticRouter.get("/users", validateTokenAdmin, statisticUsers);
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 income:
- *                   type: object
- *                   properties:
- *                     totalIncomeCurrent:
- *                       type: number
- *                     totalIncomePrevious:
- *                       type: number
- *                     difference:
- *                       type: number
- *                 newCustomers:
- *                   type: object
- *                   properties:
- *                     totalNewCustomerCurrent:
- *                       type: integer
- *                     totalNewCustomerPrevious:
- *                       type: integer
- *                     difference:
- *                       type: integer
- *                 newArtists:
- *                   type: object
- *                   properties:
- *                     totalNewArtistCurrent:
- *                       type: integer
- *                     totalNewArtistPrevious:
- *                       type: integer
- *                     difference:
- *                       type: integer
+ *               $ref: '#/components/schemas/SalesStatistics'
  *       403:
  *         description: Forbidden - Admin only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 statisticRouter.get("/sales", validateTokenAdmin, statisticSales);
 
@@ -111,39 +167,19 @@ statisticRouter.get("/sales", validateTokenAdmin, statisticSales);
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 income:
- *                   type: object
- *                   properties:
- *                     totalIncomeCurrent:
- *                       type: number
- *                     totalIncomePrevious:
- *                       type: number
- *                     difference:
- *                       type: number
- *                 newCustomers:
- *                   type: object
- *                   properties:
- *                     totalNewCustomerCurrent:
- *                       type: integer
- *                     totalNewCustomerPrevious:
- *                       type: integer
- *                     difference:
- *                       type: integer
- *                 newArtists:
- *                   type: object
- *                   properties:
- *                     totalNewArtistCurrent:
- *                       type: integer
- *                     totalNewArtistPrevious:
- *                       type: integer
- *                     difference:
- *                       type: integer
+ *               $ref: '#/components/schemas/SalesStatistics'
  *       403:
  *         description: Forbidden - Admin only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 statisticRouter.get("/sales/month", validateTokenAdmin, statisticSalesForMonth);
 
@@ -168,32 +204,19 @@ statisticRouter.get("/sales/month", validateTokenAdmin, statisticSalesForMonth);
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 countTransactions:
- *                   type: array
- *                   items:
- *                     type: integer
- *                   description: Transaction count for each month
- *                 totalAmount:
- *                   type: array
- *                   items:
- *                     type: number
- *                   description: Total amount for each month
- *                 countCustomers:
- *                   type: array
- *                   items:
- *                     type: integer
- *                   description: Customer count for each month
- *                 countArtists:
- *                   type: array
- *                   items:
- *                     type: integer
- *                   description: Artist count for each month
+ *               $ref: '#/components/schemas/MonthlyStatistics'
  *       403:
  *         description: Forbidden - Admin only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 statisticRouter.get("/monthly/:year", validateTokenAdmin, statisticForMonthly);
 
