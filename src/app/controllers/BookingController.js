@@ -21,7 +21,7 @@ const payos = new PayOS(
 const createBooking = asyncHandler(async (req, res) => {
   try {
     // Check if user is customer
-    if (req.user.roleName !== UserRoleEnum.CUSTOMER) {
+    if (req.user.role_name !== UserRoleEnum.CUSTOMER) {
       res.status(403);
       throw new Error("Chỉ có khách hàng mới có thể tạo booking");
     }
@@ -130,7 +130,7 @@ const createBooking = asyncHandler(async (req, res) => {
 const completeBooking = asyncHandler(async (req, res) => {
   try {
     // Check if user is cameraman
-    if (req.user.roleName !== UserRoleEnum.CAMERAMAN) {
+    if (req.user.role_name !== UserRoleEnum.CAMERAMAN) {
       res.status(403);
       throw new Error("Chỉ có cameraman mới có thể hoàn thành booking");
     }
@@ -184,11 +184,11 @@ const getBookings = asyncHandler(async (req, res) => {
     let query = {};
     
     // If user is customer, get their bookings
-    if (req.user.roleName === UserRoleEnum.CUSTOMER) {
+    if (req.user.role_name === UserRoleEnum.CUSTOMER) {
       query.customer_id = req.user.id;
     }
     // If user is cameraman, get bookings for their services
-    else if (req.user.roleName === UserRoleEnum.CAMERAMAN) {
+    else if (req.user.role_name === UserRoleEnum.CAMERAMAN) {
       query.cameraman_id = req.user.id;
     }
 
@@ -240,7 +240,7 @@ const getBookingById = asyncHandler(async (req, res) => {
     // Check if user has permission to view this booking
     const isCustomer = booking.customer_id._id.toString() === req.user.id;
     const isCameraman = booking.cameraman_id._id.toString() === req.user.id;
-    const isAdmin = req.user.roleName === UserRoleEnum.ADMIN;
+    const isAdmin = req.user.role_name === UserRoleEnum.ADMIN;
 
     if (!isCustomer && !isCameraman && !isAdmin) {
       res.status(403);

@@ -8,7 +8,7 @@ const { UserRoleEnum } = require("../../enum/UserEnum");
 const getAllReports = asyncHandler(async (req, res) => {
   try {
     // Chỉ admin mới có quyền xem tất cả báo cáo
-    if (req.user.roleName !== UserRoleEnum.ADMIN) {
+    if (req.user.role_name !== UserRoleEnum.ADMIN) {
       res.status(403);
       throw new Error("Chỉ có Admin có quyền truy xuất thông tin tất cả báo cáo");
     }
@@ -57,7 +57,7 @@ const getReportById = asyncHandler(async (req, res) => {
     }
 
     // Kiểm tra quyền truy cập (admin, người báo cáo, hoặc người bị báo cáo)
-    if (req.user.roleName !== UserRoleEnum.ADMIN && 
+    if (req.user.role_name !== UserRoleEnum.ADMIN && 
         report.customer_id._id.toString() !== req.user.id && 
         report.cameraman_id._id.toString() !== req.user.id) {
       res.status(403);
@@ -81,7 +81,7 @@ const getReportsByCustomer = asyncHandler(async (req, res) => {
     let skip = (page - 1) * limit;
 
     // Kiểm tra quyền truy cập
-    if (req.user.roleName !== UserRoleEnum.ADMIN && req.user.id !== customer_id) {
+    if (req.user.role_name !== UserRoleEnum.ADMIN && req.user.id !== customer_id) {
       res.status(403);
       throw new Error("Bạn không có quyền truy cập báo cáo của người khác");
     }
@@ -127,7 +127,7 @@ const getReportsByCameraman = asyncHandler(async (req, res) => {
     let skip = (page - 1) * limit;
 
     // Kiểm tra quyền truy cập
-    if (req.user.roleName !== UserRoleEnum.ADMIN && req.user.id !== cameraman_id) {
+    if (req.user.role_name !== UserRoleEnum.ADMIN && req.user.id !== cameraman_id) {
       res.status(403);
       throw new Error("Bạn không có quyền truy cập báo cáo của người khác");
     }
@@ -237,7 +237,7 @@ const updateReportStatus = asyncHandler(async (req, res) => {
     const { status } = req.body;
 
     // Chỉ admin mới có quyền cập nhật trạng thái báo cáo
-    if (req.user.roleName !== UserRoleEnum.ADMIN) {
+    if (req.user.role_name !== UserRoleEnum.ADMIN) {
       res.status(403);
       throw new Error("Chỉ có Admin có quyền cập nhật trạng thái báo cáo");
     }
@@ -276,7 +276,7 @@ const deleteReportById = asyncHandler(async (req, res) => {
     const { report_id } = req.params;
     
     // Kiểm tra quyền xóa (chỉ admin hoặc chủ sở hữu báo cáo)
-    if (req.user.roleName !== UserRoleEnum.ADMIN) {
+    if (req.user.role_name !== UserRoleEnum.ADMIN) {
       const report = await Report.findById(report_id);
       if (!report) {
         res.status(404);
@@ -310,7 +310,7 @@ const deleteReportById = asyncHandler(async (req, res) => {
 const getReportStats = asyncHandler(async (req, res) => {
   try {
     // Chỉ admin mới có quyền xem thống kê
-    if (req.user.roleName !== UserRoleEnum.ADMIN) {
+    if (req.user.role_name !== UserRoleEnum.ADMIN) {
       res.status(403);
       throw new Error("Chỉ có Admin có quyền xem thống kê báo cáo");
     }
@@ -347,7 +347,7 @@ const getReportStats = asyncHandler(async (req, res) => {
 const getReportsByStatus = asyncHandler(async (req, res) => {
   try {
     // Chỉ admin mới có quyền xem báo cáo theo trạng thái
-    if (req.user.roleName !== UserRoleEnum.ADMIN) {
+    if (req.user.role_name !== UserRoleEnum.ADMIN) {
       res.status(403);
       throw new Error("Chỉ có Admin có quyền xem báo cáo theo trạng thái");
     }

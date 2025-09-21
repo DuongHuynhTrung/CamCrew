@@ -258,7 +258,7 @@ const deleteReviewById = asyncHandler(async (req, res) => {
     const { review_id } = req.params;
     
     // Kiểm tra quyền xóa (chỉ admin hoặc chủ sở hữu đánh giá)
-    if (req.user.roleName !== UserRoleEnum.ADMIN) {
+    if (req.user.role_name !== UserRoleEnum.ADMIN) {
       const review = await Review.findById(review_id);
       if (!review) {
         res.status(404);

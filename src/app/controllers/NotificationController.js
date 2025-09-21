@@ -56,7 +56,7 @@ const getNotificationById = asyncHandler(async (req, res) => {
     }
 
     // Check if user has permission to view this notification
-    if (notification.user_id._id.toString() !== req.user.id && req.user.roleName !== UserRoleEnum.ADMIN) {
+    if (notification.user_id._id.toString() !== req.user.id && req.user.role_name !== UserRoleEnum.ADMIN) {
       res.status(403);
       throw new Error("Bạn không có quyền xem thông báo này");
     }
@@ -75,7 +75,7 @@ const getNotificationById = asyncHandler(async (req, res) => {
 const createNotification = asyncHandler(async (req, res) => {
   try {
     // Check if user is admin
-    if (req.user.roleName !== UserRoleEnum.ADMIN) {
+    if (req.user.role_name !== UserRoleEnum.ADMIN) {
       res.status(403);
       throw new Error("Chỉ có Admin có quyền tạo thông báo");
     }
@@ -132,7 +132,7 @@ const updateNotification = asyncHandler(async (req, res) => {
     }
 
     // Check if user has permission to update this notification
-    if (notification.user_id.toString() !== req.user.id && req.user.roleName !== UserRoleEnum.ADMIN) {
+    if (notification.user_id.toString() !== req.user.id && req.user.role_name !== UserRoleEnum.ADMIN) {
       res.status(403);
       throw new Error("Bạn không có quyền cập nhật thông báo này");
     }
@@ -171,7 +171,7 @@ const deleteNotification = asyncHandler(async (req, res) => {
     }
 
     // Check if user has permission to delete this notification
-    if (notification.user_id.toString() !== req.user.id && req.user.roleName !== UserRoleEnum.ADMIN) {
+    if (notification.user_id.toString() !== req.user.id && req.user.role_name !== UserRoleEnum.ADMIN) {
       res.status(403);
       throw new Error("Bạn không có quyền xóa thông báo này");
     }

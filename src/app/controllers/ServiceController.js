@@ -3,6 +3,7 @@ const Service = require("../models/Service");
 const User = require("../models/User");
 const { createAndEmitNotification } = require("./NotificationController");
 const NotificationTypeEnum = require("../../enum/NotificationEnum");
+const { UserRoleEnum } = require("../../enum/UserEnum");
 
 // Helper: build filter for getAllServices
 function buildServiceFilter(query) {
@@ -111,7 +112,7 @@ const createService = asyncHandler(async (req, res) => {
       res.status(404);
       throw new Error("Người tạo dịch vụ không tồn tại");
     }
-    if (cameraman.role !== "cameraman") {
+    if (cameraman.role_name !== UserRoleEnum.CAMERAMAN) {
       res.status(403);
       throw new Error("Chỉ có cameraman mới được tạo dịch vụ");
     }
@@ -133,7 +134,7 @@ const createService = asyncHandler(async (req, res) => {
     const savedService = await service.save();
     
     // Create notification for admin
-    const admin = await User.findOne({ role_name: "admin" });
+    const admin = await User.findOne({ role_name: UserRoleEnum.ADMIN });
     if (admin) {
       await createAndEmitNotification(
         admin._id,

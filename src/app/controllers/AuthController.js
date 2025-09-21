@@ -313,7 +313,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
         user: {
           full_name: user.full_name,
           email: user.email,
-          roleName: user.role,
+          role_name: user.role_name,
           avatar_url: user.avatar_url,
           id: user.id,
         },

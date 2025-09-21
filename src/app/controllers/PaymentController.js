@@ -12,7 +12,7 @@ const { BookingStatusEnum } = require("../../enum/BookingEnum");
 const getPayments = asyncHandler(async (req, res) => {
   try {
     // Check if user is admin
-    if (req.user.roleName !== UserRoleEnum.ADMIN) {
+    if (req.user.role_name !== UserRoleEnum.ADMIN) {
       res.status(403);
       throw new Error("Chỉ có Admin có quyền xem tất cả thanh toán");
     }
@@ -106,13 +106,13 @@ const getMyPayments = asyncHandler(async (req, res) => {
     let query = {};
     
     // If user is customer, get payments for their bookings
-    if (req.user.roleName === UserRoleEnum.CUSTOMER) {
+    if (req.user.role_name === UserRoleEnum.CUSTOMER) {
       const userBookings = await Booking.find({ customer_id: req.user.id }).select('_id');
       const bookingIds = userBookings.map(booking => booking._id);
       query.booking_id = { $in: bookingIds };
     }
     // If user is cameraman, get payments for bookings of their services
-    else if (req.user.roleName === UserRoleEnum.CAMERAMAN) {
+    else if (req.user.role_name === UserRoleEnum.CAMERAMAN) {
       const userBookings = await Booking.find({ cameraman_id: req.user.id }).select('_id');
       const bookingIds = userBookings.map(booking => booking._id);
       query.booking_id = { $in: bookingIds };
@@ -143,7 +143,7 @@ const getMyPayments = asyncHandler(async (req, res) => {
     if (search) {
       // Search in related booking data for current user
       let userBookingQuery = {};
-      if (req.user.roleName === UserRoleEnum.CUSTOMER) {
+      if (req.user.role_name === UserRoleEnum.CUSTOMER) {
         userBookingQuery = { 
           customer_id: req.user.id,
           $or: [
@@ -151,7 +151,7 @@ const getMyPayments = asyncHandler(async (req, res) => {
             { 'cameraman_id': { $regex: search, $options: 'i' } }
           ]
         };
-      } else if (req.user.roleName === UserRoleEnum.CAMERAMAN) {
+      } else if (req.user.role_name === UserRoleEnum.CAMERAMAN) {
         userBookingQuery = { 
           cameraman_id: req.user.id,
           $or: [
@@ -231,7 +231,7 @@ const getPaymentById = asyncHandler(async (req, res) => {
     const booking = payment.booking_id;
     const isCustomer = booking.customer_id._id.toString() === req.user.id;
     const isCameraman = booking.cameraman_id._id.toString() === req.user.id;
-    const isAdmin = req.user.roleName === UserRoleEnum.ADMIN;
+    const isAdmin = req.user.role_name === UserRoleEnum.ADMIN;
 
     if (!isCustomer && !isCameraman && !isAdmin) {
       res.status(403);
@@ -253,7 +253,7 @@ const getPaymentById = asyncHandler(async (req, res) => {
 const updatePaymentStatus = asyncHandler(async (req, res) => {
   try {
     // Check if user is admin
-    if (req.user.roleName !== UserRoleEnum.ADMIN) {
+    if (req.user.role_name !== UserRoleEnum.ADMIN) {
       res.status(403);
       throw new Error("Chỉ có Admin có quyền cập nhật trạng thái thanh toán");
     }
@@ -309,7 +309,7 @@ const updatePaymentStatus = asyncHandler(async (req, res) => {
 const getPaymentStatistics = asyncHandler(async (req, res) => {
   try {
     // Check if user is admin
-    if (req.user.roleName !== UserRoleEnum.ADMIN) {
+    if (req.user.role_name !== UserRoleEnum.ADMIN) {
       res.status(403);
       throw new Error("Chỉ có Admin có quyền xem thống kê thanh toán");
     }

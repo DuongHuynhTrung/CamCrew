@@ -24,7 +24,7 @@ const payos = new PayOS(
 //@access private
 const getUsers = asyncHandler(async (req, res, next) => {
   try {
-    if (req.user.roleName !== UserRoleEnum.ADMIN) {
+    if (req.user.role_name !== UserRoleEnum.ADMIN) {
       res.status(403);
       throw new Error(
         "Chỉ có Admin có quyền truy xuất thông tin tất cả tài khoản khách hàng"
@@ -115,7 +115,7 @@ const getUserById = asyncHandler(async (req, res, next) => {
     }
     const userEmail = user.email;
     if (
-      !(req.user.email === userEmail || req.user.roleName === UserRoleEnum.ADMIN)
+      !(req.user.email === userEmail || req.user.role_name === UserRoleEnum.ADMIN)
     ) {
       res.status(403);
       throw new Error("Bạn không có quyền truy cập thông tin người dùng");
@@ -195,7 +195,7 @@ const deleteUsers = asyncHandler(async (req, res, next) => {
       res.status(404);
       throw new Error("Không tìm thấy người dùng!");
     }
-    if (req.user.roleName !== UserRoleEnum.ADMIN) {
+    if (req.user.role_name !== UserRoleEnum.ADMIN) {
       res.status(403);
       throw new Error("Bạn không có quyền cập nhật thông tin người dùng");
     }
@@ -617,7 +617,7 @@ const upRoleCameramanByAdmin = asyncHandler(async (req, res, next) => {
 const createMembershipSubscriptionPayment = asyncHandler(async (req, res) => {
   try {
     // Check if user is cameraman
-    if (req.user.roleName !== UserRoleEnum.CAMERAMAN) {
+    if (req.user.role_name !== UserRoleEnum.CAMERAMAN) {
       res.status(403);
       throw new Error("Chỉ có cameraman mới có thể nâng cấp gói thành viên");
     }
@@ -744,7 +744,7 @@ const startSubscriptionMonitoring = () => {
 // @access private (Admin only)
 const manualCheckSubscriptions = asyncHandler(async (req, res) => {
   try {
-    if (req.user.roleName !== UserRoleEnum.ADMIN) {
+    if (req.user.role_name !== UserRoleEnum.ADMIN) {
       res.status(403);
       throw new Error("Chỉ có Admin mới có thể thực hiện kiểm tra thủ công");
     }

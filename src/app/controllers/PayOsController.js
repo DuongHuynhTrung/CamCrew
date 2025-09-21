@@ -18,7 +18,7 @@ const payos = new PayOS(
 
 const createBuyServicesPayOsUrl = asyncHandler(async (req, res) => {
   try {
-    if (req.user.roleName !== UserRoleEnum.CUSTOMER) {
+    if (req.user.role_name !== UserRoleEnum.CUSTOMER) {
       res.status(403);
       throw new Error("Chỉ có khách hàng có quyền thanh toán giao dịch");
     }
