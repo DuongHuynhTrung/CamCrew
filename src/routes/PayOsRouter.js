@@ -146,4 +146,8 @@ payOsRouter.post("/create-schedule", validateToken, createSchedulePayOsUrl);
 
 payOsRouter.post("/callback", payOsCallBack);
 
+payOsRouter.get("/callback", (req, res) => {
+  res.status(200).send("Webhook callback alive");
+});
+
 module.exports = payOsRouter;
