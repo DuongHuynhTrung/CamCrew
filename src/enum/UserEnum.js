@@ -5,8 +5,8 @@ const UserStatusEnum = {
 
 const UserMembershipEnum = {
     NORMAL: "normal",
-    ONE_MONTH: "one_month",
-    SIX_MONTH: "six_month"
+    ONE_MONTH: "1month",
+    SIX_MONTH: "6month"
 };
 
 const UserRoleEnum = {

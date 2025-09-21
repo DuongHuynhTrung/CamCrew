@@ -624,7 +624,7 @@ userRouter
  *                 description: User ID
  *               membership:
  *                 type: string
- *                 enum: [one_month, six_month]
+ *                 enum: [1month, 6month]
  *                 description: Type of membership to upgrade to
  *               amount:
  *                 type: number
@@ -661,7 +661,7 @@ userRouter.post("/upMembershipByAccountBalance", upMembershipByAccountBalance);
  *             properties:
  *               membership_type:
  *                 type: string
- *                 enum: [one_month, six_month]
+ *                 enum: [1month, 6month]
  *                 description: Type of membership subscription
  *               amount:
  *                 type: number
