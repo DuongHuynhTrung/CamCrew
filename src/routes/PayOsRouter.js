@@ -17,7 +17,7 @@ const { validateToken } = require("../app/middleware/validateTokenHandler");
 
 /**
  * @swagger
- * /api/payos/create-buy-services:
+ * /api/payOs/create-buy-services:
  *   post:
  *     summary: Create PayOS payment URL for buying services
  *     tags: [PayOS]
@@ -73,7 +73,7 @@ payOsRouter.post(
 
 /**
  * @swagger
- * /api/payos/create-schedule:
+ * /api/payOs/create-schedule:
  *   post:
  *     summary: Create PayOS payment URL for scheduling services
  *     tags: [PayOS]

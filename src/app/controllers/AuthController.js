@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { UserRoleEnum } = require("../../enum/UserEnum");
+const { UserRoleEnum, UserStatusEnum } = require("../../enum/UserEnum");
 const { jwtDecode } = require("jwt-decode");
 
 //@desc Register New user
@@ -117,7 +117,7 @@ const loginGoogle = asyncHandler(async (req, res) => {
           user: {
             full_name: user.full_name,
             email: user.email,
-            roleName: user.role,
+            role_name: user.role_name,
             avatar_url: user.avatar_url,
             id: user.id,
           },
@@ -147,7 +147,7 @@ const loginGoogle = asyncHandler(async (req, res) => {
           user: {
             full_name: newUser.full_name,
             email: newUser.email,
-            roleName: newUser.role,
+            role_name: newUser.role_name,
             avatar_url: newUser.avatar_url,
             id: newUser.id,
           },
@@ -210,7 +210,7 @@ const login = asyncHandler(async (req, res, next) => {
           user: {
             full_name: user.full_name,
             email: user.email,
-            roleName: user.role,
+            role_name: user.role_name,
             avatar_url: user.avatar_url,
             id: user.id,
           },
@@ -224,7 +224,7 @@ const login = asyncHandler(async (req, res, next) => {
           user: {
             full_name: user.full_name,
             email: user.email,
-            roleName: user.role,
+            role_name: user.role_name,
             avatar_url: user.avatar_url,
             id: user.id,
           },
@@ -291,7 +291,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
           user: {
             full_name: user.full_name,
             email: user.email,
-            roleName: user.role,
+            role_name: user.role_name,
             avatar_url: user.avatar_url,
             id: user.id,
           },

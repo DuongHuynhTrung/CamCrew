@@ -42,7 +42,7 @@ const validateTokenAdmin = asyncHandler(async (req, res, next) => {
           res.status(401);
           throw new Error("Sai email hoặc mật khẩu!");
         }
-        if (decoded.user.roleName !== UserRoleEnum.ADMIN) {
+        if (decoded.user.role_name !== UserRoleEnum.ADMIN) {
           res.status(403);
           throw new Error("Chi có Admin có quyền thực hiện chức năng này");
         }
@@ -75,7 +75,7 @@ const validateTokenCustomer = asyncHandler(async (req, res, next) => {
           res.status(401);
           throw new Error("Sai email hoặc mật khẩu!");
         }
-        if (decoded.user.roleName !== UserRoleEnum.CUSTOMER) {
+        if (decoded.user.role_name !== UserRoleEnum.CUSTOMER) {
           res.status(403);
           throw new Error("Chi có Customer có quyền thực hiện chức năng này");
         }
@@ -108,7 +108,7 @@ const validateTokenCameraman = asyncHandler(async (req, res, next) => {
           res.status(401);
           throw new Error("Sai email hoặc mật khẩu!");
         }
-        if (decoded.user.roleName !== UserRoleEnum.CAMERAMAN) {
+        if (decoded.user.role_name !== UserRoleEnum.CAMERAMAN) {
           res.status(403);
           throw new Error("Chi có Cameraman có quyền thực hiện chức năng này");
         }
