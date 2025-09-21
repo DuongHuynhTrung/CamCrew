@@ -93,7 +93,7 @@ const createBooking = asyncHandler(async (req, res) => {
     const requestData = {
       orderCode: Date.now(),
       amount: service.amount,
-      description: `Thanh toán booking dịch vụ ${service.title}`,
+      description: `Thanh toán booking dịch vụ`,
       cancelUrl: `${process.env.CLIENT_URL || "https://camcrew.vercel.app"}/activity-history&tab=bookings`,
       returnUrl: `${process.env.CLIENT_URL || "https://camcrew.vercel.app"}/activity-history&tab=bookings`,
     };

@@ -639,7 +639,7 @@ const createMembershipSubscriptionPayment = asyncHandler(async (req, res) => {
     const requestData = {
       orderCode: Date.now(),
       amount: amount,
-      description: `Nâng cấp gói thành viên ${membership_type}`,
+      description: `Nâng cấp gói ${membership_type}`,
       cancelUrl: `${process.env.CLIENT_URL || "https://camcrew.vercel.app"}/`,
       returnUrl: `${process.env.CLIENT_URL || "https://camcrew.vercel.app"}/`,
     };
