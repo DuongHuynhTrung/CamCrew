@@ -135,12 +135,13 @@ const payOsCallBack = asyncHandler(async (req, res) => {
     const tempTransaction = await TempTransaction.findOne({
       orderCode: orderCode,
     });
+    
+    // Acknowledge webhook even if no matching temp transaction is found to avoid 404/retries
+    if (!tempTransaction) {
+      return res.status(200).send("OK");
+    }
 
     if (code == "00") {
-      if (!tempTransaction) {
-        res.status(404);
-        throw new Error("Không tìm thấy giao dịch tạm thời");
-      }
       // Payment successful
       if (tempTransaction.type === "buy_service") {
         // Handle service purchase
@@ -184,10 +185,6 @@ const payOsCallBack = asyncHandler(async (req, res) => {
         }
       }
       else if (tempTransaction.type === "booking_payment") {
-        if (!tempTransaction) {
-          res.status(404);
-          throw new Error("Không tìm thấy giao dịch tạm thời");
-        }
         // Handle booking payment
         const booking = await Booking.findById(tempTransaction.booking_id)
           .populate('service_id', 'title')
@@ -214,10 +211,6 @@ const payOsCallBack = asyncHandler(async (req, res) => {
       }
       else {
         // Handle legacy schedule creation
-        if (!tempTransaction) {
-          res.status(404);
-          throw new Error("Không tìm thấy giao dịch tạm thời");
-        }
         const {
           customer_id,
           artist_id,
@@ -249,10 +242,6 @@ const payOsCallBack = asyncHandler(async (req, res) => {
         await transaction.save();
       }
     } else {
-      if (!tempTransaction) {
-        res.status(404);
-        throw new Error("Không tìm thấy giao dịch tạm thời");
-      }
       // Payment failed
       if (tempTransaction.type === "booking_payment") {
         const booking = await Booking.findById(tempTransaction.booking_id);
@@ -270,8 +259,10 @@ const payOsCallBack = asyncHandler(async (req, res) => {
       }
     }
 
-    // Remove temp Transaction
-    await tempTransaction.remove();
+    // Remove temp Transaction if it exists
+    if (tempTransaction) {
+      await tempTransaction.remove();
+    }
 
     res.status(200).send("Thành công");
   } catch (error) {
