@@ -136,12 +136,11 @@ const payOsCallBack = asyncHandler(async (req, res) => {
       orderCode: orderCode,
     });
 
-    if (!tempTransaction) {
-      res.status(404);
-      throw new Error("Không tìm thấy giao dịch tạm thời");
-    }
-
     if (code == "00") {
+      if (!tempTransaction) {
+        res.status(404);
+        throw new Error("Không tìm thấy giao dịch tạm thời");
+      }
       // Payment successful
       if (tempTransaction.type === "buy_service") {
         // Handle service purchase
@@ -185,6 +184,10 @@ const payOsCallBack = asyncHandler(async (req, res) => {
         }
       }
       else if (tempTransaction.type === "booking_payment") {
+        if (!tempTransaction) {
+          res.status(404);
+          throw new Error("Không tìm thấy giao dịch tạm thời");
+        }
         // Handle booking payment
         const booking = await Booking.findById(tempTransaction.booking_id)
           .populate('service_id', 'title')
@@ -211,6 +214,10 @@ const payOsCallBack = asyncHandler(async (req, res) => {
       }
       else {
         // Handle legacy schedule creation
+        if (!tempTransaction) {
+          res.status(404);
+          throw new Error("Không tìm thấy giao dịch tạm thời");
+        }
         const {
           customer_id,
           artist_id,
@@ -242,6 +249,10 @@ const payOsCallBack = asyncHandler(async (req, res) => {
         await transaction.save();
       }
     } else {
+      if (!tempTransaction) {
+        res.status(404);
+        throw new Error("Không tìm thấy giao dịch tạm thời");
+      }
       // Payment failed
       if (tempTransaction.type === "booking_payment") {
         const booking = await Booking.findById(tempTransaction.booking_id);
