@@ -11,14 +11,33 @@ const { UserRoleEnum } = require("../../enum/UserEnum");
 // Helper: build filter for getAllServices
 function buildServiceFilter(query) {
   const filter = {};
+
+  const coerceToArray = (value) => {
+    if (Array.isArray(value)) return value;
+    if (typeof value === "string") {
+      // support comma-separated list: "a,b,c"
+      return value.split(",").map((v) => v.trim()).filter((v) => v.length > 0);
+    }
+    return value ? [value] : [];
+  };
+
   if (query.styles) {
-    filter.styles = { $in: Array.isArray(query.styles) ? query.styles : [query.styles] };
+    const styles = coerceToArray(query.styles);
+    if (styles.length > 0) {
+      filter.styles = { $in: styles };
+    }
   }
   if (query.categories) {
-    filter.categories = { $in: Array.isArray(query.categories) ? query.categories : [query.categories] };
+    const categories = coerceToArray(query.categories);
+    if (categories.length > 0) {
+      filter.categories = { $in: categories };
+    }
   }
   if (query.areas) {
-    filter.areas = { $in: Array.isArray(query.areas) ? query.areas : [query.areas] };
+    const areas = coerceToArray(query.areas);
+    if (areas.length > 0) {
+      filter.areas = { $in: areas };
+    }
   }
   if (query.min !== undefined || query.max !== undefined) {
     filter.amount = {};
@@ -66,7 +85,7 @@ const getAllServices = asyncHandler(async (req, res) => {
 // Lấy dịch vụ theo ID
 const getServiceById = asyncHandler(async (req, res) => {
   try {
-    const service = await Service.findById(req.params.service_id)
+    const service = await Service.findById(req.params.id)
       .populate("cameraman_id")
       .exec();
     if (!service) {
@@ -157,7 +176,7 @@ const createService = asyncHandler(async (req, res) => {
 // Cập nhật dịch vụ theo ID - chỉ khi status là pending
 const updateServiceById = asyncHandler(async (req, res) => {
   try {
-    const service = await Service.findById(req.params.service_id);
+    const service = await Service.findById(req.params.id);
     if (!service) {
       res.status(404);
       throw new Error("Dịch vụ không tồn tại");
@@ -173,7 +192,7 @@ const updateServiceById = asyncHandler(async (req, res) => {
     delete updateData.rejection_reason;
 
     const updatedService = await Service.findByIdAndUpdate(
-      req.params.service_id,
+      req.params.id,
       updateData,
       { new: true, runValidators: true }
     );
@@ -189,7 +208,7 @@ const updateServiceById = asyncHandler(async (req, res) => {
 // Không xóa, chỉ chuyển status sang disabled
 const disableServiceById = asyncHandler(async (req, res) => {
   try {
-    const service = await Service.findById(req.params.service_id);
+    const service = await Service.findById(req.params.id);
     if (!service) {
       res.status(404);
       throw new Error("Dịch vụ không tồn tại");
@@ -211,7 +230,7 @@ const disableServiceById = asyncHandler(async (req, res) => {
 const approveServiceById = asyncHandler(async (req, res) => {
   try {
     // Yêu cầu: chỉ admin mới được duyệt, kiểm tra quyền ở middleware ngoài
-    const service = await Service.findById(req.params.service_id);
+    const service = await Service.findById(req.params.id);
     if (!service) {
       res.status(404);
       throw new Error("Dịch vụ không tồn tại");

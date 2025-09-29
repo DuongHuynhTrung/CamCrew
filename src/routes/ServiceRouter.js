@@ -139,17 +139,32 @@ const {
  *         name: styles
  *         schema:
  *           type: string
- *         description: Filter by styles (comma-separated)
+ *         description: Filter by styles (comma-separated or multi)
  *       - in: query
- *         name: minPrice
+ *         name: categories
+ *         schema:
+ *           type: string
+ *         description: Filter by categories (comma-separated or multi)
+ *       - in: query
+ *         name: areas
+ *         schema:
+ *           type: string
+ *         description: Filter by areas (comma-separated or multi)
+ *       - in: query
+ *         name: min
  *         schema:
  *           type: number
  *         description: Minimum price filter
  *       - in: query
- *         name: maxPrice
+ *         name: max
  *         schema:
  *           type: number
  *         description: Maximum price filter
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *         description: Filter by service status
  *       - in: query
  *         name: location
  *         schema:
