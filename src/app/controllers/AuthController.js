@@ -68,6 +68,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
       console.error("Email configuration missing: EMAIL or PASSWORD environment variables not set");
       // Vẫn trả về success nhưng log lỗi
     } else {
+      console.log(`${process.env.EMAIL} ${process.env.PASSWORD}`);
       // Thử gửi email với nhiều cấu hình khác nhau
       const emailConfigs = [
         // Config 1: Gmail với port 465
