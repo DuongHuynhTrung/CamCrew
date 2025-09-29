@@ -175,6 +175,57 @@ notificationRouter.route("/").get(validateToken, getNotifications).post(validate
 
 /**
  * @swagger
+ * /api/notifications/mark-all-read:
+ *   patch:
+ *     summary: Mark all notifications as read for current user
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: All notifications marked as read
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+notificationRouter.patch("/mark-all-read", validateToken, markAllAsRead);
+
+/**
+ * @swagger
+ * /api/notifications/unread-count:
+ *   get:
+ *     summary: Get unread notification count for current user
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Unread notification count
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UnreadCountResponse'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+notificationRouter.get("/unread-count", validateToken, getUnreadCount);
+
+/**
+ * @swagger
  * /api/notifications/{id}:
  *   get:
  *     summary: Get notification by ID
@@ -284,56 +335,5 @@ notificationRouter.route("/").get(validateToken, getNotifications).post(validate
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 notificationRouter.route("/:id").get(validateToken, getNotificationById).put(validateToken, updateNotification).delete(validateToken, deleteNotification);
-
-/**
- * @swagger
- * /api/notifications/mark-all-read:
- *   patch:
- *     summary: Mark all notifications as read for current user
- *     tags: [Notifications]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: All notifications marked as read
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- */
-notificationRouter.patch("/mark-all-read", validateToken, markAllAsRead);
-
-/**
- * @swagger
- * /api/notifications/unread-count:
- *   get:
- *     summary: Get unread notification count for current user
- *     tags: [Notifications]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Unread notification count
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/UnreadCountResponse'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- */
-notificationRouter.get("/unread-count", validateToken, getUnreadCount);
 
 module.exports = notificationRouter;

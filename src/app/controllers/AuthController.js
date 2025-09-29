@@ -8,9 +8,7 @@ const { jwtDecode } = require("jwt-decode");
 //@desc Register New user
 //@route POST /api/users/register
 //@access public
-const nodemailer = require("nodemailer");
-const fs = require("fs");
-const path = require("path");
+const emailService = require("../../services/emailService");
 
 const registerUser = asyncHandler(async (req, res, next) => {
   try {
@@ -56,100 +54,17 @@ const registerUser = asyncHandler(async (req, res, next) => {
     // Tạo link xác thực
     const verifyLink = `${process.env.CLIENT_URL || "https://camcrew.vercel.app"}/verify&upn=${verifyToken}`;
 
-    // Đọc file verify_form.html và thay thế các thông tin
-    const templatePath = path.join(__dirname, "../../views/verify_form.html");
-    let emailBody = fs.readFileSync(templatePath, "utf8");
-    emailBody = emailBody
-      .replace(/USER_NAME/g, user.full_name || user.email)
-      .replace(/VERIFY_LINK/g, verifyLink);
-
-    // Kiểm tra biến môi trường email
-    if (!process.env.EMAIL || !process.env.PASSWORD) {
-      console.error("Email configuration missing: EMAIL or PASSWORD environment variables not set");
-      // Vẫn trả về success nhưng log lỗi
-    } else {
-      console.log(`${process.env.EMAIL} ${process.env.PASSWORD}`);
-      // Thử gửi email với nhiều cấu hình khác nhau
-      const emailConfigs = [
-        // Config 1: Gmail với port 465
-        {
-          host: "smtp.gmail.com",
-          port: 465,
-          secure: true,
-          service: "gmail",
-          auth: {
-            user: process.env.EMAIL,
-            pass: process.env.PASSWORD,
-          },
-          connectionTimeout: 30000,
-          greetingTimeout: 15000,
-          socketTimeout: 30000,
-          tls: {
-            rejectUnauthorized: false,
-            ciphers: 'SSLv3'
-          },
-          pool: true,
-          maxConnections: 1,
-          maxMessages: 1
-        },
-        // Config 2: Gmail với port 587
-        {
-          host: "smtp.gmail.com",
-          port: 587,
-          secure: false,
-          service: "gmail",
-          auth: {
-            user: process.env.EMAIL,
-            pass: process.env.PASSWORD,
-          },
-          connectionTimeout: 20000,
-          greetingTimeout: 10000,
-          socketTimeout: 20000,
-          tls: {
-            rejectUnauthorized: false
-          }
-        }
-      ];
-
-      let emailSent = false;
-      let lastError = null;
-
-      for (let i = 0; i < emailConfigs.length && !emailSent; i++) {
-        try {
-          console.log(`Trying email config ${i + 1}...`);
-          const transporter = nodemailer.createTransport(emailConfigs[i]);
-
-          const mailOptions = {
-            from: process.env.EMAIL,
-            to: user.email,
-            subject: "Xác thực tài khoản CamCrew",
-            html: emailBody,
-          };
-
-          // Verify connection trước khi gửi
-          await transporter.verify();
-          console.log(`SMTP connection verified successfully with config ${i + 1}`);
-          
-          const info = await transporter.sendMail(mailOptions);
-          console.log(`Verify email sent successfully: ${info.messageId}`);
-          emailSent = true;
-          
-          // Đóng connection
-          transporter.close();
-        } catch (emailError) {
-          console.error(`Email config ${i + 1} failed:`, emailError.message);
-          lastError = emailError;
-          
-          if (i < emailConfigs.length - 1) {
-            console.log(`Trying next config...`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-        }
-      }
-
-      if (!emailSent) {
-        console.error("All email configurations failed:", lastError?.message);
-      }
+    // Gửi email xác thực sử dụng email service
+    try {
+      const emailResult = await emailService.sendVerificationEmail(
+        user.email,
+        user.full_name || user.email,
+        verifyLink
+      );
+      console.log(`Verification email sent successfully via ${emailResult.method}:`, emailResult.messageId);
+    } catch (emailError) {
+      console.error("Failed to send verification email:", emailError.message);
+      // Vẫn trả về success nhưng log lỗi để không ảnh hưởng đến user experience
     }
 
     res.status(200).json({

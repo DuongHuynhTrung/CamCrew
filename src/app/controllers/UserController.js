@@ -1,15 +1,13 @@
 const asyncHandler = require("express-async-handler");
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
-const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
 const moment = require("moment/moment");
 const cron = require("node-cron");
 const { UserRoleEnum, UserStatusEnum, UserMembershipEnum } = require("../../enum/UserEnum");
 const NotificationTypeEnum = require("../../enum/NotificationEnum");
 const { createAndEmitNotification } = require("./NotificationController");
-const fs = require("fs");
-const path = require("path");
+const emailService = require("../../services/emailService");
 const TempTransaction = require("../models/TempTransaction");
 const PayOS = require("@payos/node");
 
@@ -452,94 +450,13 @@ const forgotPassword = asyncHandler(async (req, res) => {
     user.otpExpired = new Date();
     await user.save();
 
-    // Đọc template otp.html và thay thế các thông tin
-    const templatePath = path.join(__dirname, "../../views/otp.html");
-    let emailBody = fs.readFileSync(templatePath, "utf8");
-    emailBody = emailBody
-      .replace(/USER_NAME/g, user.full_name || user.email)
-      .replace(/OTP_CODE/g, otp)
-      .replace(/OTP_EXPIRE_MINUTES/g, "10");
-
-    // Thử gửi email với nhiều cấu hình khác nhau
-    const emailConfigs = [
-      // Config 1: Gmail với port 465
-      {
-        host: "smtp.gmail.com",
-        port: 465,
-        secure: true,
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL,
-          pass: process.env.PASSWORD,
-        },
-        connectionTimeout: 30000,
-        greetingTimeout: 15000,
-        socketTimeout: 30000,
-        tls: {
-          rejectUnauthorized: false,
-          ciphers: 'SSLv3'
-        },
-        pool: true,
-        maxConnections: 1,
-        maxMessages: 1
-      },
-      // Config 2: Gmail với port 587
-      {
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false,
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL,
-          pass: process.env.PASSWORD,
-        },
-        connectionTimeout: 20000,
-        greetingTimeout: 10000,
-        socketTimeout: 20000,
-        tls: {
-          rejectUnauthorized: false
-        }
-      }
-    ];
-
-    const mailOptions = {
-      from: process.env.EMAIL,
-      to: email,
-      subject: "Mã OTP đặt lại mật khẩu CamCrew",
-      html: emailBody,
-    };
-
-    let emailSent = false;
-    let lastError = null;
-
-    for (let i = 0; i < emailConfigs.length && !emailSent; i++) {
-      try {
-        console.log(`Trying OTP email config ${i + 1}...`);
-        const transporter = nodemailer.createTransport(emailConfigs[i]);
-
-        // Verify connection trước khi gửi
-        await transporter.verify();
-        console.log(`SMTP connection verified successfully for OTP with config ${i + 1}`);
-        
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`OTP email sent successfully: ${info.messageId}`);
-        emailSent = true;
-        
-        // Đóng connection
-        transporter.close();
-      } catch (emailError) {
-        console.error(`OTP email config ${i + 1} failed:`, emailError.message);
-        lastError = emailError;
-        
-        if (i < emailConfigs.length - 1) {
-          console.log(`Trying next OTP config...`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
-    }
-
-    if (!emailSent) {
-      console.error("All OTP email configurations failed:", lastError?.message);
+    // Gửi email OTP sử dụng email service
+    try {
+      const emailResult = await emailService.sendOTPEmail(email, otp);
+      console.log(`OTP email sent successfully via ${emailResult.method}:`, emailResult.messageId);
+    } catch (emailError) {
+      console.error("Failed to send OTP email:", emailError.message);
+      // Vẫn trả về success nhưng log lỗi để không ảnh hưởng đến user experience
     }
 
     res.status(200).json({ message: "OTP đã được gửi đến email" });

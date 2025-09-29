@@ -13,6 +13,55 @@ const PORT = process.env.PORT || 5000;
 
 const net = require('net');
 
+// Enable JSON body parsing before test routes
+app.use(express.json());
+
+// Test email service configuration
+app.get('/test-email', async (req, res) => {
+  try {
+    const emailService = require('./src/services/emailService');
+    const status = emailService.getStatus();
+    
+    res.json({
+      message: 'Email service status',
+      status,
+      recommendations: [
+        'Recommended: Use Resend (no phone verification)',
+        'Set RESEND_API_KEY and RESEND_FROM_EMAIL env vars',
+        'Optional fallback: Gmail SMTP may be blocked on cloud providers'
+      ]
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Test actual email sending
+app.post('/test-email-send', async (req, res) => {
+  try {
+    const { to, subject = 'Test Email from CamCrew', message = 'This is a test email' } = req.body;
+    
+    if (!to) {
+      return res.status(400).json({ error: 'Email address is required' });
+    }
+
+    const emailService = require('./src/services/emailService');
+    const result = await emailService.sendEmail(to, subject, `<p>${message}</p>`);
+    
+    res.json({
+      success: true,
+      message: 'Test email sent successfully',
+      result
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to send test email',
+      details: error.message 
+    });
+  }
+});
+
+// Legacy SMTP test (for reference)
 app.get('/test-smtp', async (req, res) => {
   const tests = [
     { host: 'smtp.gmail.com', port: 465, name: 'Gmail SSL' },
@@ -53,7 +102,10 @@ app.get('/test-smtp', async (req, res) => {
     }
   }
 
-  res.json({ results });
+  res.json({ 
+    results,
+    note: 'SMTP ports are often blocked on cloud platforms like Render. Use /test-email instead.'
+  });
 });
 
 // Trust proxy for rate limiting on Render

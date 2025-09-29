@@ -237,6 +237,49 @@ paymentRouter.get("/my-payments", validateToken, getMyPayments);
 
 /**
  * @swagger
+ * /api/payments/statistics:
+ *   get:
+ *     summary: Get payment statistics (Admin only)
+ *     tags: [Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Start date for statistics
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: End date for statistics
+ *     responses:
+ *       200:
+ *         description: Payment statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PaymentStatistics'
+ *       403:
+ *         description: Forbidden - Admin only
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+paymentRouter.get("/statistics", validateTokenAdmin, getPaymentStatistics);
+
+/**
+ * @swagger
  * /api/payments/{id}:
  *   get:
  *     summary: Get payment by ID
@@ -320,48 +363,5 @@ paymentRouter.get("/my-payments", validateToken, getMyPayments);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 paymentRouter.route("/:id").get(validateToken, getPaymentById).put(validateTokenAdmin, updatePaymentStatus);
-
-/**
- * @swagger
- * /api/payments/statistics:
- *   get:
- *     summary: Get payment statistics (Admin only)
- *     tags: [Payments]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: startDate
- *         schema:
- *           type: string
- *           format: date
- *         description: Start date for statistics
- *       - in: query
- *         name: endDate
- *         schema:
- *           type: string
- *           format: date
- *         description: End date for statistics
- *     responses:
- *       200:
- *         description: Payment statistics
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/PaymentStatistics'
- *       403:
- *         description: Forbidden - Admin only
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- */
-paymentRouter.get("/statistics", validateTokenAdmin, getPaymentStatistics);
 
 module.exports = paymentRouter;
