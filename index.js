@@ -11,6 +11,51 @@ const swaggerUi = require("swagger-ui-express");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const net = require('net');
+
+app.get('/test-smtp', async (req, res) => {
+  const tests = [
+    { host: 'smtp.gmail.com', port: 465, name: 'Gmail SSL' },
+    { host: 'smtp.gmail.com', port: 587, name: 'Gmail TLS' },
+    { host: 'smtp.gmail.com', port: 25, name: 'Gmail Port 25' }
+  ];
+
+  const results = [];
+
+  for (const test of tests) {
+    try {
+      await new Promise((resolve, reject) => {
+        const socket = net.createConnection({
+          host: test.host,
+          port: test.port,
+          timeout: 5000
+        });
+
+        socket.on('connect', () => {
+          results.push(`✅ ${test.name}: CONNECTED`);
+          socket.destroy();
+          resolve();
+        });
+
+        socket.on('timeout', () => {
+          results.push(`❌ ${test.name}: TIMEOUT`);
+          socket.destroy();
+          reject();
+        });
+
+        socket.on('error', (err) => {
+          results.push(`❌ ${test.name}: ${err.message}`);
+          reject();
+        });
+      });
+    } catch (err) {
+      // Error already logged
+    }
+  }
+
+  res.json({ results });
+});
+
 // Trust proxy for rate limiting on Render
 app.set('trust proxy', 1);
 
