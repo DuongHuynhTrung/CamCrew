@@ -226,7 +226,7 @@ notificationRouter.route("/").get(validateToken, getNotifications).post(validate
  *           schema:
  *             type: object
  *             properties:
- *               isRead:
+ *               is_read:
  *                 type: boolean
  *                 description: Mark as read/unread
  *     responses:

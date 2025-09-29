@@ -174,27 +174,34 @@ userRouter.route("/delete-no-auth/:id").delete(deleteUsersNoAuth);
 
 /**
  * @swagger
- * /api/users/forgotPassword/{email}:
+ * /api/users/forgot-password:
  *   post:
  *     summary: Send password reset email
  *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: email
- *         schema:
- *           type: string
- *           format: email
- *         required: true
- *         description: User's email address
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: User's email address
  *     responses:
  *       200:
  *         description: Password reset email sent successfully
+ *       400:
+ *         description: Invalid email
  *       404:
  *         description: User not found
  *       500:
  *         description: Internal Server Error
  */
-userRouter.post("/forgotPassword/:email", forgotPassword);
+userRouter.post("/forgot-password", forgotPassword);
 
 /**
  * @swagger

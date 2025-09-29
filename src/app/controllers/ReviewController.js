@@ -1,9 +1,26 @@
 const asyncHandler = require("express-async-handler");
+const mongoose = require("mongoose");
 const Review = require("../models/Review");
 const User = require("../models/User");
+const Booking = require("../models/Booking");
+const { BookingStatusEnum } = require("../../enum/BookingEnum");
 const { UserRoleEnum } = require("../../enum/UserEnum");
 const { createAndEmitNotification } = require("./NotificationController");
 const NotificationTypeEnum = require("../../enum/NotificationEnum");
+
+// Helper: recalc and update cameraman average rating on User.avg_rating
+async function updateCameramanAverageRating(cameramanId) {
+  const stats = await Review.aggregate([
+    { $match: { cameraman_id: new mongoose.Types.ObjectId(cameramanId) } },
+    { $group: { _id: "$cameraman_id", avg: { $avg: "$rating" } } },
+  ]);
+  const avg = stats.length > 0 ? stats[0].avg : 0;
+  await User.findByIdAndUpdate(
+    cameramanId,
+    { avg_rating: Math.round(avg * 10) / 10 },
+    { new: true }
+  );
+}
 
 // Lấy tất cả đánh giá với phân trang
 const getAllReviews = asyncHandler(async (req, res) => {
@@ -183,6 +200,19 @@ const createReview = asyncHandler(async (req, res) => {
       res.status(400);
       throw new Error("Bạn đã đánh giá thợ chụp ảnh này rồi");
     }
+    
+    // Only allow review if there is at least one completed booking between them
+    const hasCompletedBooking = await Booking.exists({
+      customer_id,
+      cameraman_id,
+      status: BookingStatusEnum.COMPLETED,
+    });
+    if (!hasCompletedBooking) {
+      res.status(400);
+      throw new Error(
+        "Bạn chỉ có thể đánh giá khi đã hoàn thành ít nhất một booking với thợ này"
+      );
+    }
 
     const review = new Review({
       customer_id,
@@ -198,6 +228,9 @@ const createReview = asyncHandler(async (req, res) => {
       { path: "customer_id", select: "full_name avatar_url" },
       { path: "cameraman_id", select: "full_name avatar_url email" }
     ]);
+
+    // Cập nhật điểm trung bình cho cameraman
+    await updateCameramanAverageRating(cameraman_id);
 
     // Create notification for cameraman
     await createAndEmitNotification(
@@ -244,6 +277,11 @@ const updateReviewById = asyncHandler(async (req, res) => {
       throw new Error("Không tìm thấy đánh giá để cập nhật");
     }
 
+    // Cập nhật lại avg_rating của cameraman sau khi chỉnh sửa
+    await updateCameramanAverageRating(
+      updatedReview.cameraman_id._id ? updatedReview.cameraman_id._id : updatedReview.cameraman_id
+    );
+
     res.status(200).json(updatedReview);
   } catch (error) {
     res
@@ -276,6 +314,9 @@ const deleteReviewById = asyncHandler(async (req, res) => {
       res.status(404);
       throw new Error("Không tìm thấy đánh giá để xóa");
     }
+
+    // Cập nhật lại avg_rating của cameraman sau khi xóa
+    await updateCameramanAverageRating(deletedReview.cameraman_id);
 
     res.status(200).json({ 
       message: "Đã xóa đánh giá thành công", 

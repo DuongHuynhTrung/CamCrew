@@ -1,6 +1,9 @@
 const asyncHandler = require("express-async-handler");
 const Service = require("../models/Service");
 const User = require("../models/User");
+const Booking = require("../models/Booking");
+const { BookingStatusEnum } = require("../../enum/BookingEnum");
+const { ServiceStatusEnum } = require("../../enum/ServiceEnum");
 const { createAndEmitNotification } = require("./NotificationController");
 const NotificationTypeEnum = require("../../enum/NotificationEnum");
 const { UserRoleEnum } = require("../../enum/UserEnum");
@@ -127,7 +130,7 @@ const createService = asyncHandler(async (req, res) => {
       video_demo_urls,
       date_get_job,
       time_of_day,
-      status: "pending", // default
+      status: ServiceStatusEnum.PENDING, // default
       rejection_reason: "",
     });
 
@@ -159,7 +162,7 @@ const updateServiceById = asyncHandler(async (req, res) => {
       res.status(404);
       throw new Error("Dịch vụ không tồn tại");
     }
-    if (service.status !== "pending") {
+    if (service.status !== ServiceStatusEnum.PENDING) {
       res.status(400);
       throw new Error("Chỉ được chỉnh sửa dịch vụ khi trạng thái là pending");
     }
@@ -191,10 +194,10 @@ const disableServiceById = asyncHandler(async (req, res) => {
       res.status(404);
       throw new Error("Dịch vụ không tồn tại");
     }
-    if (service.status === "disabled") {
+    if (service.status === ServiceStatusEnum.DISABLED) {
       return res.status(200).json({ message: "Dịch vụ đã bị vô hiệu hóa" });
     }
-    service.status = "disabled";
+    service.status = ServiceStatusEnum.DISABLED;
     await service.save();
     res.status(200).json({ message: "Dịch vụ đã được vô hiệu hóa" });
   } catch (error) {
@@ -213,11 +216,11 @@ const approveServiceById = asyncHandler(async (req, res) => {
       res.status(404);
       throw new Error("Dịch vụ không tồn tại");
     }
-    if (service.status !== "pending") {
+    if (service.status !== ServiceStatusEnum.PENDING) {
       res.status(400);
       throw new Error("Chỉ dịch vụ ở trạng thái pending mới được duyệt");
     }
-    service.status = "approved";
+    service.status = ServiceStatusEnum.APPROVED;
     service.rejection_reason = "";
     await service.save();
     
@@ -245,16 +248,16 @@ const rejectServiceById = asyncHandler(async (req, res) => {
       res.status(400);
       throw new Error("Vui lòng cung cấp lý do từ chối");
     }
-    const service = await Service.findById(req.params.service_id);
+    const service = await Service.findById(req.params.id);
     if (!service) {
       res.status(404);
       throw new Error("Dịch vụ không tồn tại");
     }
-    if (service.status !== "pending") {
+    if (service.status !== ServiceStatusEnum.PENDING) {
       res.status(400);
       throw new Error("Chỉ dịch vụ ở trạng thái pending mới được từ chối");
     }
-    service.status = "rejected";
+    service.status = ServiceStatusEnum.REJECTED;
     service.rejection_reason = rejection_reason;
     await service.save();
     
@@ -295,7 +298,17 @@ const getFreeSlot = asyncHandler(async (req, res) => {
       return res.status(200).json([]);
     }
 
-    res.status(200).json(service.time_of_day || []);
+    // Lọc các khung giờ đã bị chiếm bởi booking (PAYING hoặc REQUESTED)
+    const takenBookings = await Booking.find({
+      cameraman_id: service.cameraman_id,
+      scheduled_date: new Date(date_get_job),
+      status: { $in: [BookingStatusEnum.REQUESTED, BookingStatusEnum.PAYING] }
+    }).select("time_of_day");
+
+    const takenSlots = new Set(takenBookings.map((b) => b.time_of_day));
+    const freeSlots = (service.time_of_day || []).filter((slot) => !takenSlots.has(slot));
+
+    res.status(200).json(freeSlots);
   } catch (error) {
     res
       .status(res.statusCode || 500)

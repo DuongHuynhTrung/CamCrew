@@ -63,32 +63,68 @@ const registerUser = asyncHandler(async (req, res, next) => {
       .replace(/USER_NAME/g, user.full_name || user.email)
       .replace(/VERIFY_LINK/g, verifyLink);
 
-    // Gửi mail xác thực
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true, // use SSL
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL,
-        pass: process.env.PASSWORD,
-      },
-    });
+    // Kiểm tra biến môi trường email
+    if (!process.env.EMAIL || !process.env.PASSWORD) {
+      console.error("Email configuration missing: EMAIL or PASSWORD environment variables not set");
+      // Vẫn trả về success nhưng log lỗi
+    } else {
+      // Gửi mail xác thực với cấu hình tối ưu cho Render
+      const transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 587, // Sử dụng port 587 thay vì 465
+        secure: false, // false cho port 587, true cho port 465
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL,
+          pass: process.env.PASSWORD,
+        },
+        // Thêm cấu hình timeout và retry
+        connectionTimeout: 60000, // 60 seconds
+        greetingTimeout: 30000, // 30 seconds
+        socketTimeout: 60000, // 60 seconds
+        // Thêm tùy chọn TLS
+        tls: {
+          rejectUnauthorized: false
+        }
+      });
 
-    const mailOptions = {
-      from: process.env.EMAIL,
-      to: user.email,
-      subject: "Xác thực tài khoản CamCrew",
-      html: emailBody,
-    };
+      const mailOptions = {
+        from: process.env.EMAIL,
+        to: user.email,
+        subject: "Xác thực tài khoản CamCrew",
+        html: emailBody,
+      };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log("Send verify email error:", error);
-      } else {
-        console.log(`Verify email sent: ${info.response}`);
+      // Sử dụng async/await với retry mechanism
+      let retryCount = 0;
+      const maxRetries = 3;
+      let emailSent = false;
+
+      while (retryCount < maxRetries && !emailSent) {
+        try {
+          // Verify connection trước khi gửi
+          await transporter.verify();
+          console.log("SMTP connection verified successfully");
+          
+          const info = await transporter.sendMail(mailOptions);
+          console.log(`Verify email sent successfully: ${info.messageId}`);
+          emailSent = true;
+        } catch (emailError) {
+          retryCount++;
+          console.error(`Send verify email error (attempt ${retryCount}/${maxRetries}):`, emailError.message);
+          
+          if (retryCount < maxRetries) {
+            console.log(`Retrying in 2 seconds...`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          } else {
+            console.error("Failed to send email after all retry attempts");
+          }
+        }
       }
-    });
+
+      // Đóng connection
+      transporter.close();
+    }
 
     res.status(200).json({
       message: "Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.",

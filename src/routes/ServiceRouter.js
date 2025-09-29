@@ -498,6 +498,62 @@ serviceRouter.patch("/:id/reject", validateTokenAdmin, rejectServiceById);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
+/**
+ * @swagger
+ * /api/services/free-slots:
+ *   post:
+ *     summary: Get free time slots for a service
+ *     tags: [Services]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - service_id
+ *               - date_get_job
+ *             properties:
+ *               service_id:
+ *                 type: string
+ *                 description: Service ID
+ *               date_get_job:
+ *                 type: string
+ *                 format: date
+ *                 description: Date to check for free slots
+ *     responses:
+ *       200:
+ *         description: Free slots retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 freeSlots:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *       400:
+ *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Service not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 serviceRouter.post("/free-slots", getFreeSlot);
 
 module.exports = serviceRouter;

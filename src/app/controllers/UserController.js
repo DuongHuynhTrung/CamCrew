@@ -460,16 +460,24 @@ const forgotPassword = asyncHandler(async (req, res) => {
       .replace(/OTP_CODE/g, otp)
       .replace(/OTP_EXPIRE_MINUTES/g, "10");
 
-    // Gửi mail OTP
+    // Gửi mail OTP với cấu hình tối ưu cho Render
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
-      port: 465,
-      secure: true, // use SSL
+      port: 587, // Sử dụng port 587 thay vì 465
+      secure: false, // false cho port 587, true cho port 465
       service: "gmail",
       auth: {
         user: process.env.EMAIL,
         pass: process.env.PASSWORD,
       },
+      // Thêm cấu hình timeout và retry
+      connectionTimeout: 60000, // 60 seconds
+      greetingTimeout: 30000, // 30 seconds
+      socketTimeout: 60000, // 60 seconds
+      // Thêm tùy chọn TLS
+      tls: {
+        rejectUnauthorized: false
+      }
     });
 
     const mailOptions = {
@@ -479,13 +487,35 @@ const forgotPassword = asyncHandler(async (req, res) => {
       html: emailBody,
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log("Send OTP email error:", error);
-      } else {
-        console.log(`OTP email sent: ${info.response}`);
+    // Sử dụng async/await với retry mechanism
+    let retryCount = 0;
+    const maxRetries = 3;
+    let emailSent = false;
+
+    while (retryCount < maxRetries && !emailSent) {
+      try {
+        // Verify connection trước khi gửi
+        await transporter.verify();
+        console.log("SMTP connection verified successfully for OTP");
+        
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`OTP email sent successfully: ${info.messageId}`);
+        emailSent = true;
+      } catch (emailError) {
+        retryCount++;
+        console.error(`Send OTP email error (attempt ${retryCount}/${maxRetries}):`, emailError.message);
+        
+        if (retryCount < maxRetries) {
+          console.log(`Retrying OTP email in 2 seconds...`);
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        } else {
+          console.error("Failed to send OTP email after all retry attempts");
+        }
       }
-    });
+    }
+
+    // Đóng connection
+    transporter.close();
 
     res.status(200).json({ message: "OTP đã được gửi đến email" });
   } catch (error) {
