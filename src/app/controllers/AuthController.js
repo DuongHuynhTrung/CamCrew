@@ -12,7 +12,7 @@ const emailService = require("../../services/emailService");
 
 const registerUser = asyncHandler(async (req, res, next) => {
   try {
-    const { email, password, full_name, phone_number, role } = req.body;
+    const { email, password, full_name, phone_number, role, description } = req.body;
     if (email === undefined || password === undefined) {
       res.status(400);
       throw new Error("Tất cả các trường không được để trống!");
@@ -32,6 +32,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
       password: hashedPassword,
       full_name,
       phone_number,
+      description,
       role_name: role || UserRoleEnum.CUSTOMER,
       is_verified: false,
     });

@@ -146,7 +146,8 @@ const updateUsers = asyncHandler(async (req, res, next) => {
       "avatar_url",
       "phone_number",
       "dob",
-      "gender"
+      "gender",
+      "description"
     ];
 
     // Nếu có phone_number thì kiểm tra trùng
