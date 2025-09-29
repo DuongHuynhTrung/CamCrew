@@ -68,62 +68,87 @@ const registerUser = asyncHandler(async (req, res, next) => {
       console.error("Email configuration missing: EMAIL or PASSWORD environment variables not set");
       // Vẫn trả về success nhưng log lỗi
     } else {
-      // Gửi mail xác thực với cấu hình tối ưu cho Render
-      const transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587, // Sử dụng port 587 thay vì 465
-        secure: false, // false cho port 587, true cho port 465
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL,
-          pass: process.env.PASSWORD,
+      // Thử gửi email với nhiều cấu hình khác nhau
+      const emailConfigs = [
+        // Config 1: Gmail với port 465
+        {
+          host: "smtp.gmail.com",
+          port: 465,
+          secure: true,
+          service: "gmail",
+          auth: {
+            user: process.env.EMAIL,
+            pass: process.env.PASSWORD,
+          },
+          connectionTimeout: 30000,
+          greetingTimeout: 15000,
+          socketTimeout: 30000,
+          tls: {
+            rejectUnauthorized: false,
+            ciphers: 'SSLv3'
+          },
+          pool: true,
+          maxConnections: 1,
+          maxMessages: 1
         },
-        // Thêm cấu hình timeout và retry
-        connectionTimeout: 60000, // 60 seconds
-        greetingTimeout: 30000, // 30 seconds
-        socketTimeout: 60000, // 60 seconds
-        // Thêm tùy chọn TLS
-        tls: {
-          rejectUnauthorized: false
+        // Config 2: Gmail với port 587
+        {
+          host: "smtp.gmail.com",
+          port: 587,
+          secure: false,
+          service: "gmail",
+          auth: {
+            user: process.env.EMAIL,
+            pass: process.env.PASSWORD,
+          },
+          connectionTimeout: 20000,
+          greetingTimeout: 10000,
+          socketTimeout: 20000,
+          tls: {
+            rejectUnauthorized: false
+          }
         }
-      });
+      ];
 
-      const mailOptions = {
-        from: process.env.EMAIL,
-        to: user.email,
-        subject: "Xác thực tài khoản CamCrew",
-        html: emailBody,
-      };
-
-      // Sử dụng async/await với retry mechanism
-      let retryCount = 0;
-      const maxRetries = 3;
       let emailSent = false;
+      let lastError = null;
 
-      while (retryCount < maxRetries && !emailSent) {
+      for (let i = 0; i < emailConfigs.length && !emailSent; i++) {
         try {
+          console.log(`Trying email config ${i + 1}...`);
+          const transporter = nodemailer.createTransport(emailConfigs[i]);
+
+          const mailOptions = {
+            from: process.env.EMAIL,
+            to: user.email,
+            subject: "Xác thực tài khoản CamCrew",
+            html: emailBody,
+          };
+
           // Verify connection trước khi gửi
           await transporter.verify();
-          console.log("SMTP connection verified successfully");
+          console.log(`SMTP connection verified successfully with config ${i + 1}`);
           
           const info = await transporter.sendMail(mailOptions);
           console.log(`Verify email sent successfully: ${info.messageId}`);
           emailSent = true;
-        } catch (emailError) {
-          retryCount++;
-          console.error(`Send verify email error (attempt ${retryCount}/${maxRetries}):`, emailError.message);
           
-          if (retryCount < maxRetries) {
-            console.log(`Retrying in 2 seconds...`);
-            await new Promise(resolve => setTimeout(resolve, 2000));
-          } else {
-            console.error("Failed to send email after all retry attempts");
+          // Đóng connection
+          transporter.close();
+        } catch (emailError) {
+          console.error(`Email config ${i + 1} failed:`, emailError.message);
+          lastError = emailError;
+          
+          if (i < emailConfigs.length - 1) {
+            console.log(`Trying next config...`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
           }
         }
       }
 
-      // Đóng connection
-      transporter.close();
+      if (!emailSent) {
+        console.error("All email configurations failed:", lastError?.message);
+      }
     }
 
     res.status(200).json({

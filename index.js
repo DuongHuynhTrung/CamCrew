@@ -11,6 +11,9 @@ const swaggerUi = require("swagger-ui-express");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy for rate limiting on Render
+app.set('trust proxy', 1);
+
 // Socket Config
 const httpServer = require("http").createServer(app);
 const io = require("socket.io")(httpServer, {

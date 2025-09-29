@@ -460,25 +460,47 @@ const forgotPassword = asyncHandler(async (req, res) => {
       .replace(/OTP_CODE/g, otp)
       .replace(/OTP_EXPIRE_MINUTES/g, "10");
 
-    // Gửi mail OTP với cấu hình tối ưu cho Render
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587, // Sử dụng port 587 thay vì 465
-      secure: false, // false cho port 587, true cho port 465
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL,
-        pass: process.env.PASSWORD,
+    // Thử gửi email với nhiều cấu hình khác nhau
+    const emailConfigs = [
+      // Config 1: Gmail với port 465
+      {
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL,
+          pass: process.env.PASSWORD,
+        },
+        connectionTimeout: 30000,
+        greetingTimeout: 15000,
+        socketTimeout: 30000,
+        tls: {
+          rejectUnauthorized: false,
+          ciphers: 'SSLv3'
+        },
+        pool: true,
+        maxConnections: 1,
+        maxMessages: 1
       },
-      // Thêm cấu hình timeout và retry
-      connectionTimeout: 60000, // 60 seconds
-      greetingTimeout: 30000, // 30 seconds
-      socketTimeout: 60000, // 60 seconds
-      // Thêm tùy chọn TLS
-      tls: {
-        rejectUnauthorized: false
+      // Config 2: Gmail với port 587
+      {
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL,
+          pass: process.env.PASSWORD,
+        },
+        connectionTimeout: 20000,
+        greetingTimeout: 10000,
+        socketTimeout: 20000,
+        tls: {
+          rejectUnauthorized: false
+        }
       }
-    });
+    ];
 
     const mailOptions = {
       from: process.env.EMAIL,
@@ -487,35 +509,38 @@ const forgotPassword = asyncHandler(async (req, res) => {
       html: emailBody,
     };
 
-    // Sử dụng async/await với retry mechanism
-    let retryCount = 0;
-    const maxRetries = 3;
     let emailSent = false;
+    let lastError = null;
 
-    while (retryCount < maxRetries && !emailSent) {
+    for (let i = 0; i < emailConfigs.length && !emailSent; i++) {
       try {
+        console.log(`Trying OTP email config ${i + 1}...`);
+        const transporter = nodemailer.createTransport(emailConfigs[i]);
+
         // Verify connection trước khi gửi
         await transporter.verify();
-        console.log("SMTP connection verified successfully for OTP");
+        console.log(`SMTP connection verified successfully for OTP with config ${i + 1}`);
         
         const info = await transporter.sendMail(mailOptions);
         console.log(`OTP email sent successfully: ${info.messageId}`);
         emailSent = true;
-      } catch (emailError) {
-        retryCount++;
-        console.error(`Send OTP email error (attempt ${retryCount}/${maxRetries}):`, emailError.message);
         
-        if (retryCount < maxRetries) {
-          console.log(`Retrying OTP email in 2 seconds...`);
-          await new Promise(resolve => setTimeout(resolve, 2000));
-        } else {
-          console.error("Failed to send OTP email after all retry attempts");
+        // Đóng connection
+        transporter.close();
+      } catch (emailError) {
+        console.error(`OTP email config ${i + 1} failed:`, emailError.message);
+        lastError = emailError;
+        
+        if (i < emailConfigs.length - 1) {
+          console.log(`Trying next OTP config...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
     }
 
-    // Đóng connection
-    transporter.close();
+    if (!emailSent) {
+      console.error("All OTP email configurations failed:", lastError?.message);
+    }
 
     res.status(200).json({ message: "OTP đã được gửi đến email" });
   } catch (error) {
