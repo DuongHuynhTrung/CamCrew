@@ -47,7 +47,7 @@ const {
  *           description: Time of day
  *         status:
  *           type: string
- *           enum: [paying, requested, confirmed, completed, cancelled]
+ *           enum: [paying, pay_cancelled, requested, completed]
  *           description: Booking status
  *         amount:
  *           type: number

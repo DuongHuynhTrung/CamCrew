@@ -73,7 +73,7 @@ const {
  *           description: Available time slots
  *         status:
  *           type: string
- *           enum: [pending, approved, rejected]
+ *           enum: [pending, approved, rejected, disabled]
  *           description: Service status
  *         createdAt:
  *           type: string

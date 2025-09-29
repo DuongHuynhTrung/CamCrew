@@ -85,15 +85,15 @@ const {
  *           description: "User's rank (e.g., NORMAL, ADMIN)"
  *         role_name:
  *           type: string
- *           enum: [ADMIN, CUSTOMER, CAMERAMAN]
+ *           enum: [admin, customer, cameraman]
  *           description: "User's role in the application"
  *         status:
  *           type: string
- *           enum: [ACTIVE, BLOCKED]
+ *           enum: [active, blocked]
  *           description: "User account status"
  *         membership:
  *           type: string
- *           enum: [NORMAL, ONE_MONTH, SIX_MONTH]
+ *           enum: [normal, 1month, 6month]
  *           description: "User's membership level"
  *         membership_expires_at:
  *           type: string
@@ -755,43 +755,6 @@ userRouter.post("/membership-subscription", validateTokenCameraman, createMember
  *         description: Forbidden - Only admin can trigger manual check
  */
 userRouter.post("/check-subscriptions", validateTokenAdmin, manualCheckSubscriptions);
-
-/**
- * @swagger
- * /api/users/cameramen:
- *   get:
- *     summary: Get all cameramen with pagination
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Number of cameramen per page
- *     responses:
- *       200:
- *         description: List of cameramen
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/UserResponse'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- */
- 
 
 /**
  * @swagger

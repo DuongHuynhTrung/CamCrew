@@ -44,7 +44,7 @@ const {
  *           description: Report content
  *         status:
  *           type: string
- *           enum: [pending, resolved, rejected]
+ *           enum: [pending, processed]
  *           description: Report status
  *         admin_notes:
  *           type: string

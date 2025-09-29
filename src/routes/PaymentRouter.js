@@ -37,11 +37,11 @@ const {
  *           description: Payment amount
  *         status:
  *           type: string
- *           enum: [processing, paid, failed, cancelled]
+ *           enum: [processing, paid, failed]
  *           description: Payment status
  *         type:
  *           type: string
- *           enum: [booking, membership, service]
+ *           enum: [booking, subscription]
  *           description: Payment type
  *         orderCode:
  *           type: number
