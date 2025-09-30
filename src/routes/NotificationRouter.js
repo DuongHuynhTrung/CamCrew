@@ -36,11 +36,12 @@ const {
  *           description: User ID
  *         type:
  *           type: string
+ *           enum: [booking_requested, review_new, service_confirm, service_approved, service_rejected, subscription_activated, subscription_warning, subscription_expired]
  *           description: Notification type
  *         content:
  *           type: string
  *           description: Notification content
- *         isRead:
+ *         is_read:
  *           type: boolean
  *           description: Read status
  *         createdAt:
@@ -70,7 +71,7 @@ const {
  *     UnreadCountResponse:
  *       type: object
  *       properties:
- *         count:
+ *         unreadCount:
  *           type: integer
  *           description: Number of unread notifications
  *     ErrorResponse:
@@ -107,6 +108,7 @@ const {
  *         name: type
  *         schema:
  *           type: string
+ *           enum: [booking_requested, review_new, service_confirm, service_approved, service_rejected, subscription_activated, subscription_warning, subscription_expired]
  *         description: Filter by notification type
  *       - in: query
  *         name: isRead
@@ -147,6 +149,7 @@ const {
  *                 description: User ID to send notification to
  *               type:
  *                 type: string
+ *                 enum: [booking_requested, review_new, service_confirm, service_approved, service_rejected, subscription_activated, subscription_warning, subscription_expired]
  *                 description: Notification type
  *               content:
  *                 type: string

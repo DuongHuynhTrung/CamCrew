@@ -44,9 +44,6 @@ const {
  *   schemas:
  *     User:
  *       type: object
- *       required:
- *         - email
- *         - password
  *       properties:
  *         _id:
  *           type: string
@@ -55,6 +52,9 @@ const {
  *           type: string
  *           maxLength: 255
  *           description: "User's full name"
+ *         description:
+ *           type: string
+ *           description: "User's self description"
  *         dob:
  *           type: string
  *           format: date
@@ -67,44 +67,38 @@ const {
  *           type: string
  *           maxLength: 10
  *           description: "User's phone number"
- *         country:
- *           type: string
- *           description: "User's country of residence"
  *         gender:
  *           type: string
  *           description: "User's gender"
- *         password:
- *           type: string
- *           description: "User's password"
  *         avatar_url:
  *           type: string
  *           description: "URL of the user's avatar image"
- *         rank:
- *           type: string
- *           default: "NORMAL"
- *           description: "User's rank (e.g., NORMAL, ADMIN)"
  *         role_name:
  *           type: string
- *           enum: [admin, customer, cameraman]
+ *           enum: [customer, cameraman, admin]
  *           description: "User's role in the application"
  *         status:
  *           type: string
  *           enum: [active, blocked]
  *           description: "User account status"
- *         membership:
+ *         membership_subscription:
  *           type: string
  *           enum: [normal, 1month, 6month]
- *           description: "User's membership level"
- *         membership_expires_at:
+ *           description: "User's membership subscription"
+ *         subscription_start_date:
  *           type: string
  *           format: date-time
- *           description: "Membership expiration date"
- *         account_balance:
- *           type: number
- *           description: "User's account balance"
+ *           description: "Membership subscription start date"
+ *         subscription_end_date:
+ *           type: string
+ *           format: date-time
+ *           description: "Membership subscription end date"
  *         is_verified:
  *           type: boolean
  *           description: "Email verification status"
+ *         avg_rating:
+ *           type: number
+ *           description: "Average rating for cameraman"
  *         createdAt:
  *           type: string
  *           format: date-time

@@ -46,9 +46,6 @@ const {
  *           type: string
  *           enum: [pending, processed]
  *           description: Report status
- *         admin_notes:
- *           type: string
- *           description: Admin notes
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -196,7 +193,7 @@ reportRouter.route("/").get(validateTokenAdmin, getAllReports).post(validateToke
 
 /**
  * @swagger
- * /api/reports/{id}:
+ * /api/reports/{report_id}:
  *   get:
  *     summary: Get report by ID
  *     tags: [Reports]
@@ -204,7 +201,7 @@ reportRouter.route("/").get(validateTokenAdmin, getAllReports).post(validateToke
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: report_id
  *         schema:
  *           type: string
  *         required: true
@@ -315,7 +312,7 @@ reportRouter.route("/").get(validateTokenAdmin, getAllReports).post(validateToke
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-reportRouter.route("/:id").get(validateToken, getReportById).put(validateTokenAdmin, updateReportStatus).delete(validateToken, deleteReportById);
+reportRouter.route("/:report_id").get(validateToken, getReportById).put(validateTokenAdmin, updateReportStatus).delete(validateToken, deleteReportById);
 
 /**
  * @swagger
@@ -428,6 +425,7 @@ reportRouter.get("/cameraman/:cameraman_id", validateToken, getReportsByCamerama
  *         name: status
  *         schema:
  *           type: string
+ *           enum: [pending, processed]
  *         required: true
  *         description: Report status
  *       - in: query

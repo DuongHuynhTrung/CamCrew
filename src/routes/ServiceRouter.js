@@ -49,16 +49,19 @@ const {
  *           type: array
  *           items:
  *             type: string
+ *             enum: [wedding, event, yearbook, tvc, Film]
  *           description: Photography styles
  *         categories:
  *           type: array
  *           items:
  *             type: string
+ *             enum: [cinematic, traditional, highlight, bts, documentary]
  *           description: Service categories
  *         areas:
  *           type: array
  *           items:
  *             type: string
+ *             enum: [Ho Chi Minh, Binh Duong, Can Tho, Dong Nai, Ha Noi]
  *           description: Service areas
  *         video_demo_urls:
  *           type: array
@@ -73,6 +76,7 @@ const {
  *           type: array
  *           items:
  *             type: string
+ *             enum: [morning, afternoon, evening]
  *           description: Available time slots
  *         status:
  *           type: string
@@ -103,13 +107,10 @@ const {
  *             totalResults:
  *               type: integer
  *     FreeSlotsResponse:
- *       type: object
- *       properties:
- *         availableSlots:
- *           type: array
- *           items:
- *             type: string
- *           description: List of available time slots
+ *       type: array
+ *       items:
+ *         type: string
+ *       description: List of available time slots
  *     ErrorResponse:
  *       type: object
  *       properties:
@@ -228,16 +229,19 @@ const {
  *                 type: array
  *                 items:
  *                   type: string
+ *                   enum: [wedding, event, yearbook, tvc, Film]
  *                 description: Photography styles
  *               categories:
  *                 type: array
  *                 items:
  *                   type: string
+ *                   enum: [cinematic, traditional, highlight, bts, documentary]
  *                 description: Service categories
  *               areas:
  *                 type: array
  *                 items:
  *                   type: string
+ *                   enum: [Ho Chi Minh, Binh Duong, Can Tho, Dong Nai, Ha Noi]
  *                 description: Service areas
  *               video_demo_urls:
  *                 type: array
@@ -252,6 +256,7 @@ const {
  *                 type: array
  *                 items:
  *                   type: string
+ *                   enum: [morning, afternoon, evening]
  *                 description: Available time slots
  *     responses:
  *       201:
@@ -333,16 +338,19 @@ serviceRouter.route("/").get(getAllServices).post(validateTokenCameraman, create
  *                 type: array
  *                 items:
  *                   type: string
+ *                   enum: [wedding, event, yearbook, tvc, Film]
  *                 description: Photography styles
  *               categories:
  *                 type: array
  *                 items:
  *                   type: string
+ *                   enum: [cinematic, traditional, highlight, bts, documentary]
  *                 description: Service categories
  *               areas:
  *                 type: array
  *                 items:
  *                   type: string
+ *                   enum: [Ho Chi Minh, Binh Duong, Can Tho, Dong Nai, Ha Noi]
  *                 description: Service areas
  *               video_demo_urls:
  *                 type: array
@@ -357,6 +365,7 @@ serviceRouter.route("/").get(getAllServices).post(validateTokenCameraman, create
  *                 type: array
  *                 items:
  *                   type: string
+ *                   enum: [morning, afternoon, evening]
  *                 description: Available time slots
  *     responses:
  *       200:
@@ -574,12 +583,7 @@ serviceRouter.patch("/:id/reject", validateTokenAdmin, rejectServiceById);
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 freeSlots:
- *                   type: array
- *                   items:
- *                     type: string
+ *               $ref: '#/components/schemas/FreeSlotsResponse'
  *       400:
  *         description: Invalid input
  *         content:

@@ -81,6 +81,8 @@ const {
  *       properties:
  *         booking:
  *           $ref: '#/components/schemas/Booking'
+ *         payment:
+ *           $ref: '#/components/schemas/Payment'
  *         paymentUrl:
  *           type: string
  *           description: PayOS checkout URL

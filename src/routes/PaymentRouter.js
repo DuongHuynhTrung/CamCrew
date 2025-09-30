@@ -29,9 +29,9 @@ const {
  *         _id:
  *           type: string
  *           description: Payment ID
- *         user_id:
+ *         booking_id:
  *           type: string
- *           description: User ID
+ *           description: Related booking ID
  *         amount:
  *           type: number
  *           description: Payment amount
@@ -43,12 +43,6 @@ const {
  *           type: string
  *           enum: [booking, subscription]
  *           description: Payment type
- *         orderCode:
- *           type: number
- *           description: Order code
- *         description:
- *           type: string
- *           description: Payment description
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -78,20 +72,20 @@ const {
  *       properties:
  *         totalPayments:
  *           type: integer
- *         totalAmount:
- *           type: number
- *         successfulPayments:
+ *         paidPayments:
  *           type: integer
  *         failedPayments:
  *           type: integer
- *         pendingPayments:
+ *         processingPayments:
  *           type: integer
- *         averageAmount:
+ *         bookingPayments:
+ *           type: integer
+ *         subscriptionPayments:
+ *           type: integer
+ *         totalRevenue:
  *           type: number
- *         paymentTypeDistribution:
- *           type: object
- *         statusDistribution:
- *           type: object
+ *         successRate:
+ *           type: number
  *     ErrorResponse:
  *       type: object
  *       properties:
