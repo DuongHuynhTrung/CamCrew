@@ -192,11 +192,22 @@ const getBookings = asyncHandler(async (req, res) => {
       query.cameraman_id = req.user.id;
     }
 
+    // Optional: filter by status
+    if (req.query.status) {
+      const status = String(req.query.status).toLowerCase();
+      const allowedStatuses = Object.values(BookingStatusEnum);
+      if (!allowedStatuses.includes(status)) {
+        res.status(400);
+        throw new Error("Trạng thái booking không hợp lệ");
+      }
+      query.status = status;
+    }
+
     const [bookings, total] = await Promise.all([
       Booking.find(query)
-        .populate('customer_id', 'full_name email phone_number')
-        .populate('cameraman_id', 'full_name email phone_number')
-        .populate('service_id', 'title amount')
+        .populate('customer_id')
+        .populate('cameraman_id')
+        .populate('service_id')
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 })

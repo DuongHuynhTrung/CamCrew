@@ -14,14 +14,31 @@ const getNotifications = asyncHandler(async (req, res) => {
     const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 10;
     const skip = (page - 1) * limit;
 
+    // Build filter based on query params
+    const { type, isRead } = req.query;
+    const filter = { user_id: req.user.id };
+
+    if (typeof type === "string" && type.trim() !== "") {
+      // Validate against enum if available
+      const allowedTypes = Object.values(NotificationTypeEnum || {});
+      if (!allowedTypes.length || allowedTypes.includes(type)) {
+        filter.type = type;
+      }
+    }
+
+    if (typeof isRead !== "undefined") {
+      if (isRead === "true" || isRead === true) filter.is_read = true;
+      else if (isRead === "false" || isRead === false) filter.is_read = false;
+    }
+
     const [notifications, total] = await Promise.all([
-      Notification.find({ user_id: req.user.id })
-        .populate('user_id', 'full_name email')
+      Notification.find(filter)
+        .populate('user_id')
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 })
         .exec(),
-      Notification.countDocuments({ user_id: req.user.id })
+      Notification.countDocuments(filter)
     ]);
 
     res.status(200).json({
