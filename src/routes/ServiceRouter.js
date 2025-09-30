@@ -39,6 +39,9 @@ const {
  *         title:
  *           type: string
  *           description: Service title
+ *         description:
+ *           type: string
+ *           description: Service description
  *         amount:
  *           type: number
  *           description: Service price
@@ -215,6 +218,9 @@ const {
  *               title:
  *                 type: string
  *                 description: Service title
+ *               description:
+ *                 type: string
+ *                 description: Service description
  *               amount:
  *                 type: number
  *                 description: Service price
@@ -316,18 +322,42 @@ serviceRouter.route("/").get(getAllServices).post(validateTokenCameraman, create
  *             properties:
  *               title:
  *                 type: string
+ *                 description: Service title
  *               description:
  *                 type: string
+ *                 description: Service description
  *               amount:
  *                 type: number
+ *                 description: Service price
  *               styles:
  *                 type: array
  *                 items:
  *                   type: string
- *               location:
+ *                 description: Photography styles
+ *               categories:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Service categories
+ *               areas:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Service areas
+ *               video_demo_urls:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Video demo URLs
+ *               date_get_job:
  *                 type: string
- *               duration:
- *                 type: number
+ *                 format: date
+ *                 description: Available date for job
+ *               time_of_day:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Available time slots
  *     responses:
  *       200:
  *         description: Service updated successfully

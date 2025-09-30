@@ -90,12 +90,12 @@ const createBooking = asyncHandler(async (req, res) => {
     await payment.save();
 
     // Create PayOS payment link
-    const requestData = {
+    const requestData = { 
       orderCode: Date.now(),
       amount: service.amount,
-      description: `Thanh toán booking dịch vụ`,
-      cancelUrl: `${process.env.CLIENT_URL || "https://camcrew.vercel.app"}/activity-history&tab=bookings`,
-      returnUrl: `${process.env.CLIENT_URL || "https://camcrew.vercel.app"}/activity-history&tab=bookings`,
+      description: `Thanh toán booking`,
+      cancelUrl: `${process.env.CLIENT_URL || "https://camcrew.vercel.app"}`,
+      returnUrl: `${process.env.CLIENT_URL || "https://camcrew.vercel.app"}`,
     };
 
     const paymentLinkData = await payos.createPaymentLink(requestData);

@@ -11,6 +11,9 @@ const serviceSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    description: {
+      type: String,
+    },
     amount: {
       type: Number,
       required: true,

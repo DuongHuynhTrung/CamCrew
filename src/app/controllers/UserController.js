@@ -613,8 +613,8 @@ const createMembershipSubscriptionPayment = asyncHandler(async (req, res) => {
       orderCode: Date.now(),
       amount: amount,
       description: `Nâng cấp gói ${membership_type}`,
-      cancelUrl: `${process.env.CLIENT_URL || "https://camcrew.vercel.app"}/`,
-      returnUrl: `${process.env.CLIENT_URL || "https://camcrew.vercel.app"}/`,
+      cancelUrl: `${process.env.CLIENT_URL || "https://camcrew.vercel.app"}`,
+      returnUrl: `${process.env.CLIENT_URL || "https://camcrew.vercel.app"}`,
     };
 
     const paymentLinkData = await payos.createPaymentLink(requestData);

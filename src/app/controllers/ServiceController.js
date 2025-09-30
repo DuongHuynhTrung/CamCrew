@@ -106,6 +106,7 @@ const createService = asyncHandler(async (req, res) => {
     const {
       cameraman_id,
       title,
+      description,
       amount,
       styles,
       categories,
@@ -142,6 +143,7 @@ const createService = asyncHandler(async (req, res) => {
     const service = new Service({
       cameraman_id,
       title,
+      description,
       amount,
       styles,
       categories,
