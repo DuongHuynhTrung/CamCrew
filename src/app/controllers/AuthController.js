@@ -53,7 +53,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
     );
 
     // Tạo link xác thực
-    const verifyLink = `${process.env.CLIENT_URL || "https://camcrew.vercel.app"}/verify&upn=${verifyToken}`;
+    const verifyLink = `${process.env.CLIENT_URL || "https://camcrew.vercel.app"}/verify?upn=${verifyToken}`;
 
     // Gửi email xác thực sử dụng email service
     try {
