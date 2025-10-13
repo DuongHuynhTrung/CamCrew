@@ -203,6 +203,10 @@ const swaggerDefinition = {
       url: "https://camcrew-rtao.onrender.com",
       description: "Production server",
     },
+    {
+      url: "https://cam-crew.vercel.app",
+      description: "Production server",
+    },
   ],
   components: {
     securitySchemes: {
