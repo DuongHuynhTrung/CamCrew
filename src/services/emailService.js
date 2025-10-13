@@ -183,7 +183,7 @@ class EmailService {
       const templatePath = path.join(__dirname, "../views/otp.html");
       let emailBody = fs.readFileSync(templatePath, "utf8");
       emailBody = emailBody
-        .replace(/OTP_CODE/g, otp)
+        .replace(/Code here/g, otp)
         .replace(/OTP_EXPIRE_MINUTES/g, "10");
 
       return await this.sendEmail(
