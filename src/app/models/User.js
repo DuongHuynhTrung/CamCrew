@@ -52,6 +52,9 @@ const userSchema = mongoose.Schema(
     description: {
       type: String,
     },
+    address: {
+      type: String,
+    },
     role_name: {
       type: String,
       default: UserRoleEnum.CUSTOMER,

@@ -1,5 +1,6 @@
 const express = require("express");
 const reviewRouter = express.Router();
+const mongoose = require("mongoose");
 const {
   getAllReviews,
   getReviewById,
@@ -14,6 +15,14 @@ const {
   validateToken,
   validateTokenCustomer,
 } = require("../app/middleware/validateTokenHandler");
+
+const validateObjectId = (paramName) => (req, res, next) => {
+  const value = req.params[paramName];
+  if (!mongoose.Types.ObjectId.isValid(value)) {
+    return res.status(400).json({ message: `Invalid ${paramName}` });
+  }
+  next();
+};
 
 /**
  * @swagger
@@ -305,7 +314,11 @@ reviewRouter.route("/").get(getAllReviews).post(validateTokenCustomer, createRev
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-reviewRouter.route("/:id").get(getReviewById).put(validateTokenCustomer, updateReviewById).delete(validateTokenCustomer, deleteReviewById);
+reviewRouter
+  .route("/:id")
+  .get(validateObjectId("id"), getReviewById)
+  .put(validateTokenCustomer, validateObjectId("id"), updateReviewById)
+  .delete(validateTokenCustomer, validateObjectId("id"), deleteReviewById);
 
 /**
  * @swagger
@@ -346,7 +359,7 @@ reviewRouter.route("/:id").get(getReviewById).put(validateTokenCustomer, updateR
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-reviewRouter.get("/cameraman/:cameraman_id", getReviewsByCameraman);
+reviewRouter.get("/cameraman/:cameraman_id", validateObjectId("cameraman_id"), getReviewsByCameraman);
 
 /**
  * @swagger
@@ -395,7 +408,7 @@ reviewRouter.get("/cameraman/:cameraman_id", getReviewsByCameraman);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-reviewRouter.get("/customer/:customer_id", validateTokenCustomer, getReviewsByCustomer);
+reviewRouter.get("/customer/:customer_id", validateTokenCustomer, validateObjectId("customer_id"), getReviewsByCustomer);
 
 /**
  * @swagger
@@ -424,6 +437,6 @@ reviewRouter.get("/customer/:customer_id", validateTokenCustomer, getReviewsByCu
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-reviewRouter.get("/cameraman/:cameraman_id/stats", getReviewStatsByCameraman);
+reviewRouter.get("/cameraman/:cameraman_id/stats", validateObjectId("cameraman_id"), getReviewStatsByCameraman);
 
 module.exports = reviewRouter;

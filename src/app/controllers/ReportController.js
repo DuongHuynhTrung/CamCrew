@@ -17,10 +17,28 @@ const getAllReports = asyncHandler(async (req, res) => {
     let limit = parseInt(req.query.limit) || 10;
     let skip = (page - 1) * limit;
 
-    const total = await Report.countDocuments();
-    const reports = await Report.find()
-      .populate("customer_id", "full_name email avatar_url")
-      .populate("cameraman_id", "full_name email avatar_url")
+    // Xây dựng bộ lọc theo swagger: status, type (type hiện chưa có trong schema)
+    const { status, type } = req.query;
+    const filter = {};
+
+    if (status) {
+      if (!Object.values(ReportStatusEnum).includes(status)) {
+        res.status(400);
+        throw new Error("Trạng thái báo cáo không hợp lệ");
+      }
+      filter.status = status;
+    }
+
+    // Hiện tại schema Report không có trường 'type'
+    if (typeof type !== "undefined" && type !== null && type !== "") {
+      res.status(400);
+      throw new Error("Bộ lọc 'type' chưa được hỗ trợ do thiếu trường 'type' trong schema");
+    }
+
+    const total = await Report.countDocuments(filter);
+    const reports = await Report.find(filter)
+      .populate("customer_id")
+      .populate("cameraman_id")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -47,8 +65,8 @@ const getReportById = asyncHandler(async (req, res) => {
   try {
     const { report_id } = req.params;
     const report = await Report.findById(report_id)
-      .populate("customer_id", "full_name email avatar_url")
-      .populate("cameraman_id", "full_name email avatar_url")
+      .populate("customer_id")
+      .populate("cameraman_id")
       .exec();
     
     if (!report) {
@@ -95,8 +113,8 @@ const getReportsByCustomer = asyncHandler(async (req, res) => {
 
     const total = await Report.countDocuments({ customer_id });
     const reports = await Report.find({ customer_id })
-      .populate("customer_id", "full_name email avatar_url")
-      .populate("cameraman_id", "full_name email avatar_url")
+      .populate("customer_id")
+      .populate("cameraman_id")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -141,8 +159,8 @@ const getReportsByCameraman = asyncHandler(async (req, res) => {
 
     const total = await Report.countDocuments({ cameraman_id });
     const reports = await Report.find({ cameraman_id })
-      .populate("customer_id", "full_name email avatar_url")
-      .populate("cameraman_id", "full_name email avatar_url")
+      .populate("customer_id")
+      .populate("cameraman_id")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -195,10 +213,24 @@ const createReport = asyncHandler(async (req, res) => {
       throw new Error("Không tìm thấy thợ chụp ảnh");
     }
 
-    // Kiểm tra quyền tạo báo cáo (chỉ customer mới được tạo báo cáo)
-    if (req.user.id !== customer_id) {
-      res.status(403);
-      throw new Error("Bạn chỉ có thể tạo báo cáo cho chính mình");
+    // Kiểm tra role và quyền: Admin bỏ qua kiểm tra quyền tự báo cáo và vai trò customer
+    if (req.user.role_name !== UserRoleEnum.ADMIN) {
+      if (req.user.id !== customer_id) {
+        res.status(403);
+        throw new Error("Bạn chỉ có thể tạo báo cáo cho chính mình");
+      }
+      if (req.user.role_name !== UserRoleEnum.CUSTOMER) {
+        res.status(403);
+        throw new Error("Chỉ khách hàng mới có quyền tạo báo cáo");
+      }
+      if (customer.role_name !== UserRoleEnum.CUSTOMER) {
+        res.status(400);
+        throw new Error("Người báo cáo phải là tài khoản khách hàng hợp lệ");
+      }
+    }
+    if (cameraman.role_name !== UserRoleEnum.CAMERAMAN) {
+      res.status(400);
+      throw new Error("Chỉ có thể báo cáo tài khoản thợ chụp ảnh");
     }
 
     // Kiểm tra xem customer đã báo cáo cameraman này chưa
@@ -218,8 +250,8 @@ const createReport = asyncHandler(async (req, res) => {
     
     // Populate thông tin user
     await createdReport.populate([
-      { path: "customer_id", select: "full_name email avatar_url" },
-      { path: "cameraman_id", select: "full_name email avatar_url" }
+      { path: "customer_id" },
+      { path: "cameraman_id" }
     ]);
 
     res.status(201).json(createdReport);
@@ -253,8 +285,8 @@ const updateReportStatus = asyncHandler(async (req, res) => {
       { status },
       { new: true, runValidators: true }
     )
-      .populate("customer_id", "full_name email avatar_url")
-      .populate("cameraman_id", "full_name email avatar_url")
+      .populate("customer_id")
+      .populate("cameraman_id")
       .exec();
 
     if (!updatedReport) {
@@ -365,8 +397,8 @@ const getReportsByStatus = asyncHandler(async (req, res) => {
 
     const total = await Report.countDocuments({ status });
     const reports = await Report.find({ status })
-      .populate("customer_id", "full_name email avatar_url")
-      .populate("cameraman_id", "full_name email avatar_url")
+      .populate("customer_id")
+      .populate("cameraman_id")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)

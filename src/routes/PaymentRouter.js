@@ -1,5 +1,6 @@
 const express = require("express");
 const paymentRouter = express.Router();
+const mongoose = require("mongoose");
 const {
   getPayments,
   getMyPayments,
@@ -11,6 +12,14 @@ const {
   validateToken,
   validateTokenAdmin,
 } = require("../app/middleware/validateTokenHandler");
+
+const validateObjectId = (paramName) => (req, res, next) => {
+  const value = req.params[paramName];
+  if (!mongoose.Types.ObjectId.isValid(value)) {
+    return res.status(400).json({ message: `Invalid ${paramName}` });
+  }
+  next();
+};
 
 /**
  * @swagger
@@ -356,6 +365,9 @@ paymentRouter.get("/statistics", validateTokenAdmin, getPaymentStatistics);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-paymentRouter.route("/:id").get(validateToken, getPaymentById).put(validateTokenAdmin, updatePaymentStatus);
+paymentRouter
+  .route("/:id")
+  .get(validateToken, validateObjectId("id"), getPaymentById)
+  .put(validateTokenAdmin, validateObjectId("id"), updatePaymentStatus);
 
 module.exports = paymentRouter;

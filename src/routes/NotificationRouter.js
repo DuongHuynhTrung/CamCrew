@@ -1,5 +1,6 @@
 const express = require("express");
 const notificationRouter = express.Router();
+const mongoose = require("mongoose");
 const {
   getNotifications,
   getNotificationById,
@@ -13,6 +14,14 @@ const {
   validateToken,
   validateTokenAdmin,
 } = require("../app/middleware/validateTokenHandler");
+
+const validateObjectId = (paramName) => (req, res, next) => {
+  const value = req.params[paramName];
+  if (!mongoose.Types.ObjectId.isValid(value)) {
+    return res.status(400).json({ message: `Invalid ${paramName}` });
+  }
+  next();
+};
 
 /**
  * @swagger
@@ -337,6 +346,10 @@ notificationRouter.get("/unread-count", validateToken, getUnreadCount);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-notificationRouter.route("/:id").get(validateToken, getNotificationById).put(validateToken, updateNotification).delete(validateToken, deleteNotification);
+notificationRouter
+  .route("/:id")
+  .get(validateToken, validateObjectId("id"), getNotificationById)
+  .put(validateToken, validateObjectId("id"), updateNotification)
+  .delete(validateToken, validateObjectId("id"), deleteNotification);
 
 module.exports = notificationRouter;

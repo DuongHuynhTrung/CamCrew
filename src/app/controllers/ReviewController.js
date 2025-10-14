@@ -31,8 +31,8 @@ const getAllReviews = asyncHandler(async (req, res) => {
 
     const total = await Review.countDocuments();
     const reviews = await Review.find()
-      .populate("customer_id", "full_name avatar_url")
-      .populate("cameraman_id", "full_name avatar_url")
+      .populate("customer_id")
+      .populate("cameraman_id")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -59,8 +59,8 @@ const getReviewById = asyncHandler(async (req, res) => {
   try {
     const { review_id } = req.params;
     const review = await Review.findById(review_id)
-      .populate("customer_id", "full_name avatar_url")
-      .populate("cameraman_id", "full_name avatar_url")
+      .populate("customer_id")
+      .populate("cameraman_id")
       .exec();
     
     if (!review) {
@@ -93,8 +93,8 @@ const getReviewsByCameraman = asyncHandler(async (req, res) => {
 
     const total = await Review.countDocuments({ cameraman_id });
     const reviews = await Review.find({ cameraman_id })
-      .populate("customer_id", "full_name avatar_url")
-      .populate("cameraman_id", "full_name avatar_url")
+      .populate("customer_id")
+      .populate("cameraman_id")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -140,8 +140,8 @@ const getReviewsByCustomer = asyncHandler(async (req, res) => {
 
     const total = await Review.countDocuments({ customer_id });
     const reviews = await Review.find({ customer_id })
-      .populate("customer_id", "full_name avatar_url")
-      .populate("cameraman_id", "full_name avatar_url")
+      .populate("customer_id")
+      .populate("cameraman_id")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -225,8 +225,8 @@ const createReview = asyncHandler(async (req, res) => {
     
     // Populate thông tin user
     await createdReview.populate([
-      { path: "customer_id", select: "full_name avatar_url" },
-      { path: "cameraman_id", select: "full_name avatar_url email" }
+      { path: "customer_id" },
+      { path: "cameraman_id" }
     ]);
 
     // Cập nhật điểm trung bình cho cameraman
@@ -268,8 +268,8 @@ const updateReviewById = asyncHandler(async (req, res) => {
       updateData,
       { new: true, runValidators: true }
     )
-      .populate("customer_id", "full_name avatar_url")
-      .populate("cameraman_id", "full_name avatar_url")
+      .populate("customer_id")
+      .populate("cameraman_id")
       .exec();
 
     if (!updatedReview) {

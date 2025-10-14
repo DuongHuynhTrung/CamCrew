@@ -1,5 +1,6 @@
 const express = require("express");
 const bookingRouter = express.Router();
+const mongoose = require("mongoose");
 const {
   createBooking,
   completeBooking,
@@ -11,6 +12,14 @@ const {
   validateTokenCustomer,
   validateTokenCameraman,
 } = require("../app/middleware/validateTokenHandler");
+
+const validateObjectId = (paramName) => (req, res, next) => {
+  const value = req.params[paramName];
+  if (!mongoose.Types.ObjectId.isValid(value)) {
+    return res.status(400).json({ message: `Invalid ${paramName}` });
+  }
+  next();
+};
 
 /**
  * @swagger
@@ -224,7 +233,7 @@ bookingRouter.route("/").get(validateToken, getBookings).post(validateTokenCusto
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-bookingRouter.get("/:id", validateToken, getBookingById);
+bookingRouter.get("/:id", validateToken, validateObjectId("id"), getBookingById);
 
 /**
  * @swagger
@@ -273,6 +282,6 @@ bookingRouter.get("/:id", validateToken, getBookingById);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-bookingRouter.patch("/:id/complete", validateTokenCameraman, completeBooking);
+bookingRouter.patch("/:id/complete", validateTokenCameraman, validateObjectId("id"), completeBooking);
 
 module.exports = bookingRouter;

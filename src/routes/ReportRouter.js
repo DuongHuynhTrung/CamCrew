@@ -1,5 +1,6 @@
 const express = require("express");
 const reportRouter = express.Router();
+const mongoose = require("mongoose");
 const {
   getAllReports,
   getReportById,
@@ -15,6 +16,14 @@ const {
   validateToken,
   validateTokenAdmin,
 } = require("../app/middleware/validateTokenHandler");
+
+const validateObjectId = (paramName) => (req, res, next) => {
+  const value = req.params[paramName];
+  if (!mongoose.Types.ObjectId.isValid(value)) {
+    return res.status(400).json({ message: `Invalid ${paramName}` });
+  }
+  next();
+};
 
 /**
  * @swagger
@@ -312,7 +321,11 @@ reportRouter.route("/").get(validateTokenAdmin, getAllReports).post(validateToke
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-reportRouter.route("/:report_id").get(validateToken, getReportById).put(validateTokenAdmin, updateReportStatus).delete(validateToken, deleteReportById);
+reportRouter
+  .route("/:report_id")
+  .get(validateToken, validateObjectId("report_id"), getReportById)
+  .put(validateTokenAdmin, validateObjectId("report_id"), updateReportStatus)
+  .delete(validateToken, validateObjectId("report_id"), deleteReportById);
 
 /**
  * @swagger
@@ -361,7 +374,7 @@ reportRouter.route("/:report_id").get(validateToken, getReportById).put(validate
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-reportRouter.get("/customer/:customer_id", validateToken, getReportsByCustomer);
+reportRouter.get("/customer/:customer_id", validateToken, validateObjectId("customer_id"), getReportsByCustomer);
 
 /**
  * @swagger
@@ -410,7 +423,7 @@ reportRouter.get("/customer/:customer_id", validateToken, getReportsByCustomer);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-reportRouter.get("/cameraman/:cameraman_id", validateToken, getReportsByCameraman);
+reportRouter.get("/cameraman/:cameraman_id", validateToken, validateObjectId("cameraman_id"), getReportsByCameraman);
 
 /**
  * @swagger

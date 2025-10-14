@@ -65,7 +65,7 @@ const getNotificationById = asyncHandler(async (req, res) => {
     const notificationId = req.params.id;
 
     const notification = await Notification.findById(notificationId)
-      .populate('user_id', 'full_name email');
+      .populate('user_id');
 
     if (!notification) {
       res.status(404);
@@ -118,7 +118,7 @@ const createNotification = asyncHandler(async (req, res) => {
     });
 
     const createdNotification = await notification.save();
-    await createdNotification.populate('user_id', 'full_name email');
+    await createdNotification.populate('user_id');
 
     // Emit notification to specific user
     if (global._io) {
@@ -160,7 +160,7 @@ const updateNotification = asyncHandler(async (req, res) => {
     }
 
     await notification.save();
-    await notification.populate('user_id', 'full_name email');
+    await notification.populate('user_id');
 
     res.status(200).json({
       message: "Cập nhật thông báo thành công",

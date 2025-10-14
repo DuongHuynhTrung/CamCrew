@@ -111,13 +111,6 @@ const getUserById = asyncHandler(async (req, res, next) => {
       res.status(404);
       throw new Error("Không tìm thấy người dùng!");
     }
-    const userEmail = user.email;
-    if (
-      !(req.user.email === userEmail || req.user.role_name === UserRoleEnum.ADMIN)
-    ) {
-      res.status(403);
-      throw new Error("Bạn không có quyền truy cập thông tin người dùng");
-    }
     res.status(200).json(user);
   } catch (error) {
     res.status(res.statusCode).send(error.message || "Lỗi máy chủ nội bộ");
@@ -147,7 +140,8 @@ const updateUsers = asyncHandler(async (req, res, next) => {
       "phone_number",
       "dob",
       "gender",
-      "description"
+      "description",
+      "address"
     ];
 
     // Nếu có phone_number thì kiểm tra trùng

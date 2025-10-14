@@ -187,8 +187,8 @@ const payOsCallBack = asyncHandler(async (req, res) => {
       else if (tempTransaction.type === "booking_payment") {
         // Handle booking payment
         const booking = await Booking.findById(tempTransaction.booking_id)
-          .populate('service_id', 'title')
-          .populate('cameraman_id', 'email');
+          .populate('service_id')
+          .populate('cameraman_id');
         const payment = await Payment.findById(tempTransaction.payment_id);
         
         if (booking && payment) {

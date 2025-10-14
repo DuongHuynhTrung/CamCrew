@@ -63,13 +63,13 @@ const getPayments = asyncHandler(async (req, res) => {
 
     const [payments, total] = await Promise.all([
       Payment.find(query)
-        .populate('booking_id', 'customer_id cameraman_id service_id scheduled_date time_of_day amount status')
+        .populate('booking_id')
         .populate({
           path: 'booking_id',
           populate: [
-            { path: 'customer_id', select: 'full_name email phone_number' },
-            { path: 'cameraman_id', select: 'full_name email phone_number' },
-            { path: 'service_id', select: 'title amount' }
+            { path: 'customer_id' },
+            { path: 'cameraman_id' },
+            { path: 'service_id' }
           ]
         })
         .skip(skip)
@@ -172,13 +172,13 @@ const getMyPayments = asyncHandler(async (req, res) => {
 
     const [payments, total] = await Promise.all([
       Payment.find(query)
-        .populate('booking_id', 'customer_id cameraman_id service_id scheduled_date time_of_day amount status')
+        .populate('booking_id')
         .populate({
           path: 'booking_id',
           populate: [
-            { path: 'customer_id', select: 'full_name email phone_number' },
-            { path: 'cameraman_id', select: 'full_name email phone_number' },
-            { path: 'service_id', select: 'title amount' }
+            { path: 'customer_id' },
+            { path: 'cameraman_id' },
+            { path: 'service_id' }
           ]
         })
         .skip(skip)
@@ -212,13 +212,13 @@ const getPaymentById = asyncHandler(async (req, res) => {
     const paymentId = req.params.id;
 
     const payment = await Payment.findById(paymentId)
-      .populate('booking_id', 'customer_id cameraman_id service_id scheduled_date time_of_day amount status')
+      .populate('booking_id')
       .populate({
         path: 'booking_id',
         populate: [
-          { path: 'customer_id', select: 'full_name email phone_number' },
-          { path: 'cameraman_id', select: 'full_name email phone_number' },
-          { path: 'service_id', select: 'title amount' }
+          { path: 'customer_id' },
+          { path: 'cameraman_id' },
+          { path: 'service_id' }
         ]
       });
 

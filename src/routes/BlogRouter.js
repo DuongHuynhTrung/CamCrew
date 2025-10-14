@@ -1,5 +1,6 @@
 const express = require("express");
 const blogRouter = express.Router();
+const mongoose = require("mongoose");
 
 const {
   getAllBlogs,
@@ -12,6 +13,14 @@ const {
 const {
   validateTokenAdmin,
 } = require("../app/middleware/validateTokenHandler");
+
+const validateObjectId = (paramName) => (req, res, next) => {
+  const value = req.params[paramName];
+  if (!mongoose.Types.ObjectId.isValid(value)) {
+    return res.status(400).json({ message: `Invalid ${paramName}` });
+  }
+  next();
+};
 
 /**
  * @swagger
@@ -255,6 +264,10 @@ blogRouter.route("/").get(getAllBlogs).post(validateTokenAdmin, createBlog);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-blogRouter.route("/:blog_id").get(getBlogById).put(validateTokenAdmin, updateBlogById).delete(validateTokenAdmin, deleteBlogById);
+blogRouter
+  .route("/:blog_id")
+  .get(validateObjectId("blog_id"), getBlogById)
+  .put(validateTokenAdmin, validateObjectId("blog_id"), updateBlogById)
+  .delete(validateTokenAdmin, validateObjectId("blog_id"), deleteBlogById);
 
 module.exports = blogRouter;

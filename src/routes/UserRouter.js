@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 const userRouter = express.Router();
 userRouter.use(bodyParser.json());
 const {
@@ -30,6 +31,15 @@ const {
   validateTokenAdmin,
   validateTokenCameraman,
 } = require("../app/middleware/validateTokenHandler");
+
+// Validate ObjectId middleware factory
+const validateObjectId = (paramName) => (req, res, next) => {
+  const value = req.params[paramName];
+  if (!mongoose.Types.ObjectId.isValid(value)) {
+    return res.status(400).json({ message: `Invalid ${paramName}` });
+  }
+  next();
+};
 
 /**
  * @swagger
@@ -67,6 +77,9 @@ const {
  *           type: string
  *           maxLength: 10
  *           description: "User's phone number"
+ *         address:
+ *           type: string
+ *           description: "User's address"
  *         gender:
  *           type: string
  *           description: "User's gender"
@@ -199,6 +212,41 @@ userRouter.post("/forgot-password", forgotPassword);
 
 /**
  * @swagger
+ * /api/users/verify-otp:
+ *   post:
+ *     summary: Verify OTP for password reset
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - otp
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: User's email address
+ *               otp:
+ *                 type: string
+ *                 description: OTP code
+ *     responses:
+ *       200:
+ *         description: OTP verified successfully
+ *       400:
+ *         description: Invalid or expired OTP
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal Server Error
+ */
+userRouter.post("/verify-otp", verifyOtp);
+
+/**
+ * @swagger
  * /api/users/resetPassword:
  *   post:
  *     summary: Reset user password with token
@@ -229,6 +277,55 @@ userRouter.post("/forgot-password", forgotPassword);
  *         description: Internal Server Error
  */
 userRouter.post("/resetPassword", resetPassword);
+
+/**
+ * @swagger
+ * /api/users/current:
+ *   get:
+ *     summary: Get current user's information
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current user's information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+userRouter.get("/current",validateToken, currentUser);
+
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User information
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: User not found
+ */
+userRouter.route("/:id").get(validateObjectId("id"), getUserById)
 
 userRouter.use(validateToken);
 
@@ -280,6 +377,9 @@ userRouter.use(validateToken);
  *               avatar_url:
  *                 type: string
  *                 description: "URL of the user's avatar image"
+ *               address:
+ *                 type: string
+ *                 description: "User's address"
  *               rank:
  *                 type: string
  *                 description: "User's ranlk (e.g., Normal, Premium)"
@@ -334,15 +434,21 @@ userRouter.route("/admin/:id").put(validateTokenAdmin, updateUserInfoForAdmin);
  *                 type: string
  *                 format: date
  *                 description: "User's date of birth"
- *               country:
+ *               phone_number:
  *                 type: string
- *                 description: "User's country of residence"
+ *                 description: "User's phone number"
  *               gender:
  *                 type: string
  *                 description: "User's gender"
  *               avatar_url:
  *                 type: string
  *                 description: "URL of the user's avatar image"
+ *               description:
+ *                 type: string
+ *                 description: "User's self description"
+ *               address:
+ *                 type: string
+ *                 description: "User's address"
  *     responses:
  *       200:
  *         description: User updated successfully
@@ -353,30 +459,7 @@ userRouter.route("/admin/:id").put(validateTokenAdmin, updateUserInfoForAdmin);
  */
 userRouter.route("/").get(getUsers).put(updateUsers);
 
-/**
- * @swagger
- * /api/users/current:
- *   get:
- *     summary: Get current user's information
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Current user's information
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- *       404:
- *         description: User not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- */
-userRouter.get("/current", currentUser);
-
+ 
 /**
  * @swagger
  * /api/users/statisticsAccount:
@@ -462,25 +545,6 @@ userRouter.get("/cameramen", getCameramen);
 /**
  * @swagger
  * /api/users/{id}:
- *   get:
- *     summary: Get user by ID
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: User ID
- *     responses:
- *       200:
- *         description: User information
- *       403:
- *         description: Forbidden
- *       404:
- *         description: User not found
  *   delete:
  *     summary: Delete user (Admin only)
  *     tags: [Users]
@@ -501,7 +565,7 @@ userRouter.get("/cameramen", getCameramen);
  *       404:
  *         description: User not found
  */
-userRouter.route("/:id").get(getUserById).delete(deleteUsers);
+userRouter.route("/:id").delete(validateObjectId("id"), deleteUsers);
 
 /**
  * @swagger
@@ -537,7 +601,7 @@ userRouter.route("/:id").get(getUserById).delete(deleteUsers);
  *       404:
  *         description: User not found
  */
-userRouter.route("/checkOldPassword/:id").post(checkOldPassword);
+userRouter.route("/checkOldPassword/:id").post(validateObjectId("id"), checkOldPassword);
 
 /**
  * @swagger
@@ -578,7 +642,7 @@ userRouter.route("/checkOldPassword/:id").post(checkOldPassword);
  *       404:
  *         description: User not found
  */
-userRouter.route("/changePassword/:id").put(changePassword);
+userRouter.route("/changePassword/:id").put(validateObjectId("id"), changePassword);
 
 /**
  * @swagger
@@ -606,8 +670,8 @@ userRouter.route("/changePassword/:id").put(changePassword);
  *         description: Account not found
  */
 userRouter
-  .route("/banAccountByAdmin/:account_id")
-  .patch(validateTokenAdmin, banAccountByAdmin);
+.route("/banAccountByAdmin/:account_id")
+  .patch(validateTokenAdmin, validateObjectId("account_id"), banAccountByAdmin);
 
 /**
  * @swagger
@@ -635,8 +699,8 @@ userRouter
  *         description: Account not found
  */
 userRouter
-  .route("/unBanAccountByAdmin/:account_id")
-  .patch(validateTokenAdmin, unBanAccountByAdmin);
+.route("/unBanAccountByAdmin/:account_id")
+  .patch(validateTokenAdmin, validateObjectId("account_id"), unBanAccountByAdmin);
 
 /**
  * @swagger
@@ -752,41 +816,6 @@ userRouter.post("/check-subscriptions", validateTokenAdmin, manualCheckSubscript
 
 /**
  * @swagger
- * /api/users/verify-otp:
- *   post:
- *     summary: Verify OTP for password reset
- *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - otp
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 description: User's email address
- *               otp:
- *                 type: string
- *                 description: OTP code
- *     responses:
- *       200:
- *         description: OTP verified successfully
- *       400:
- *         description: Invalid or expired OTP
- *       404:
- *         description: User not found
- *       500:
- *         description: Internal Server Error
- */
-userRouter.post("/verify-otp", verifyOtp);
-
-/**
- * @swagger
  * /api/users/up-role-cameraman/{user_id}:
  *   put:
  *     summary: Upgrade user role to cameraman (Admin only)
@@ -810,6 +839,6 @@ userRouter.post("/verify-otp", verifyOtp);
  *       404:
  *         description: User not found
  */
-userRouter.put("/up-role-cameraman/:user_id", validateTokenAdmin, upRoleCameramanByAdmin);
+userRouter.put("/up-role-cameraman/:user_id", validateTokenAdmin, validateObjectId("user_id"), upRoleCameramanByAdmin);
 
 module.exports = userRouter;

@@ -1,5 +1,6 @@
 const express = require("express");
 const serviceRouter = express.Router();
+const mongoose = require("mongoose");
 const {
   getAllServices,
   getServiceById,
@@ -15,6 +16,14 @@ const {
   validateTokenAdmin,
   validateTokenCameraman,
 } = require("../app/middleware/validateTokenHandler");
+
+const validateObjectId = (paramName) => (req, res, next) => {
+  const value = req.params[paramName];
+  if (!mongoose.Types.ObjectId.isValid(value)) {
+    return res.status(400).json({ message: `Invalid ${paramName}` });
+  }
+  next();
+};
 
 /**
  * @swagger
@@ -421,7 +430,11 @@ serviceRouter.route("/").get(getAllServices).post(validateTokenCameraman, create
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-serviceRouter.route("/:id").get(getServiceById).put(validateToken, updateServiceById).delete(validateToken, disableServiceById);
+serviceRouter
+  .route("/:id")
+  .get(validateObjectId("id"), getServiceById)
+  .put(validateToken, validateObjectId("id"), updateServiceById)
+  .delete(validateToken, validateObjectId("id"), disableServiceById);
 
 /**
  * @swagger
@@ -458,7 +471,7 @@ serviceRouter.route("/:id").get(getServiceById).put(validateToken, updateService
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-serviceRouter.patch("/:id/approve", validateTokenAdmin, approveServiceById);
+serviceRouter.patch("/:id/approve", validateTokenAdmin, validateObjectId("id"), approveServiceById);
 
 /**
  * @swagger
@@ -513,7 +526,7 @@ serviceRouter.patch("/:id/approve", validateTokenAdmin, approveServiceById);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-serviceRouter.patch("/:id/reject", validateTokenAdmin, rejectServiceById);
+serviceRouter.patch("/:id/reject", validateTokenAdmin, validateObjectId("id"), rejectServiceById);
 
 /**
  * @swagger

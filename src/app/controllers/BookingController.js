@@ -239,9 +239,9 @@ const getBookingById = asyncHandler(async (req, res) => {
     const bookingId = req.params.id;
 
     const booking = await Booking.findById(bookingId)
-      .populate('customer_id', 'full_name email phone_number')
-      .populate('cameraman_id', 'full_name email phone_number')
-      .populate('service_id', 'title amount');
+      .populate('customer_id')
+      .populate('cameraman_id')
+      .populate('service_id');
 
     if (!booking) {
       res.status(404);
