@@ -1,223 +1,95 @@
 const express = require("express");
 const statisticRouter = express.Router();
-
+const { validateTokenAdmin } = require("../app/middleware/validateTokenHandler");
 const {
-  validateTokenAdmin,
-} = require("../app/middleware/validateTokenHandler");
-const {
-  statisticSales,
-  statisticForMonthly,
-  statisticSalesForMonth,
-  statisticUsers,
+    getSummary,
+    getUserDistribution,
+    getServiceStatusDistribution,
+    getRevenue,
+    getMembershipDistribution,
 } = require("../app/controllers/StatisticController");
 
 /**
  * @swagger
  * tags:
  *   name: Statistics
- *   description: Statistics and analytics API
+ *   description: Statistics & analytics API
  */
 
 /**
  * @swagger
- * components:
- *   schemas:
- *     UserStatistics:
- *       type: object
- *       properties:
- *         totalCustomer:
- *           type: integer
- *           description: Total number of customers
- *         totalArtist:
- *           type: integer
- *           description: Total number of artists
- *     SalesStatistics:
- *       type: object
- *       properties:
- *         income:
- *           type: object
- *           properties:
- *             totalIncomeCurrent:
- *               type: number
- *             totalIncomePrevious:
- *               type: number
- *             difference:
- *               type: number
- *         newCustomers:
- *           type: object
- *           properties:
- *             totalNewCustomerCurrent:
- *               type: integer
- *             totalNewCustomerPrevious:
- *               type: integer
- *             difference:
- *               type: integer
- *         newArtists:
- *           type: object
- *           properties:
- *             totalNewArtistCurrent:
- *               type: integer
- *             totalNewArtistPrevious:
- *               type: integer
- *             difference:
- *               type: integer
- *     MonthlyStatistics:
- *       type: object
- *       properties:
- *         countTransactions:
- *           type: array
- *           items:
- *             type: integer
- *           description: Transaction count for each month
- *         totalAmount:
- *           type: array
- *           items:
- *             type: number
- *           description: Total amount for each month
- *         countCustomers:
- *           type: array
- *           items:
- *             type: integer
- *           description: Customer count for each month
- *         countArtists:
- *           type: array
- *           items:
- *             type: integer
- *           description: Artist count for each month
- *     ErrorResponse:
- *       type: object
- *       properties:
- *         message:
- *           type: string
- *         error:
- *           type: string
- */
-
-/**
- * @swagger
- * /api/statistics/users:
+ * /api/statistics/summary:
  *   get:
- *     summary: Get user statistics (Admin only)
+ *     summary: Get overall summary statistics
  *     tags: [Statistics]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: User statistics
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/UserStatistics'
- *       403:
- *         description: Forbidden - Admin only
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *         description: Summary statistics returned successfully
  */
-statisticRouter.get("/users", validateTokenAdmin, statisticUsers);
+// Summary
+statisticRouter.get("/summary", validateTokenAdmin, getSummary);
 
 /**
  * @swagger
- * /api/statistics/sales:
+ * /api/statistics/users/distribution:
  *   get:
- *     summary: Get daily sales statistics (Admin only)
+ *     summary: Get user distribution by role
  *     tags: [Statistics]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Daily sales statistics
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SalesStatistics'
- *       403:
- *         description: Forbidden - Admin only
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *         description: User distribution returned successfully
  */
-statisticRouter.get("/sales", validateTokenAdmin, statisticSales);
+// User distribution
+statisticRouter.get("/users/distribution", validateTokenAdmin, getUserDistribution);
 
 /**
  * @swagger
- * /api/statistics/sales/month:
+ * /api/statistics/services/status-distribution:
  *   get:
- *     summary: Get monthly sales statistics (Admin only)
+ *     summary: Get service distribution by status
  *     tags: [Statistics]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Monthly sales statistics
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SalesStatistics'
- *       403:
- *         description: Forbidden - Admin only
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *         description: Service status distribution returned successfully
  */
-statisticRouter.get("/sales/month", validateTokenAdmin, statisticSalesForMonth);
+// Service status distribution
+statisticRouter.get("/services/status-distribution", validateTokenAdmin, getServiceStatusDistribution);
 
 /**
  * @swagger
- * /api/statistics/monthly/{year}:
+ * /api/statistics/revenue:
  *   get:
- *     summary: Get monthly statistics for a specific year (Admin only)
+ *     summary: Get revenue and booking statistics by time range
  *     tags: [Statistics]
- *     security:
- *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: year
+ *       - in: query
+ *         name: timeRange
  *         schema:
- *           type: integer
+ *           type: string
+ *           enum: [week, month, year]
  *         required: true
- *         description: Year for statistics
+ *         description: Time range for revenue aggregation
  *     responses:
  *       200:
- *         description: Monthly statistics for the year
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/MonthlyStatistics'
- *       403:
- *         description: Forbidden - Admin only
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *         description: Revenue series returned successfully
+ *       400:
+ *         description: Invalid or missing timeRange
  */
-statisticRouter.get("/monthly/:year", validateTokenAdmin, statisticForMonthly);
+// Revenue by timeRange: week | month | year
+statisticRouter.get("/revenue", validateTokenAdmin, getRevenue);
+
+/**
+ * @swagger
+ * /api/statistics/membership/distribution:
+ *   get:
+ *     summary: Get membership distribution and revenue
+ *     tags: [Statistics]
+ *     responses:
+ *       200:
+ *         description: Membership distribution returned successfully
+ */
+// Membership distribution
+statisticRouter.get("/membership/distribution", validateTokenAdmin, getMembershipDistribution);
+
 
 module.exports = statisticRouter;
