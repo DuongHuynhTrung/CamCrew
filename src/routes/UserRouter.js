@@ -304,6 +304,43 @@ userRouter.get("/current",validateToken, currentUser);
 
 /**
  * @swagger
+ * /api/users/cameramen:
+ *   get:
+ *     summary: Get all cameramen with pagination
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of cameramen per page
+ *     responses:
+ *       200:
+ *         description: List of cameramen
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserResponse'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+userRouter.get("/cameramen", validateToken, getCameramen);
+
+/**
+ * @swagger
  * /api/users/{id}:
  *   get:
  *     summary: Get user by ID
@@ -504,43 +541,6 @@ userRouter
 userRouter
   .route("/searchAccountByEmail")
   .get(validateTokenAdmin, searchAccountByEmail);
-
-/**
- * @swagger
- * /api/users/cameramen:
- *   get:
- *     summary: Get all cameramen with pagination
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Number of cameramen per page
- *     responses:
- *       200:
- *         description: List of cameramen
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/UserResponse'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- */
-userRouter.get("/cameramen", getCameramen);
 
 /**
  * @swagger
