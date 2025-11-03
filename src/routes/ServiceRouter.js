@@ -292,7 +292,7 @@ serviceRouter.route("/").get(getAllServices).post(validateTokenCameraman, create
 
 /**
  * @swagger
- * /api/services/my:
+ * /api/services/cameraman:
  *   get:
  *     summary: Get services of logged-in cameraman
  *     tags: [Services]
@@ -346,7 +346,7 @@ serviceRouter.route("/").get(getAllServices).post(validateTokenCameraman, create
  *       401:
  *         description: Unauthorized
  */
-serviceRouter.get("/my", validateTokenCameraman, getMyServices);
+serviceRouter.get("/cameraman", validateTokenCameraman, getMyServices);
 
 /**
  * @swagger
