@@ -82,6 +82,39 @@ const getAllServices = asyncHandler(async (req, res) => {
   }
 });
 
+// Lấy tất cả dịch vụ của cameraman đang đăng nhập (theo token)
+const getMyServices = asyncHandler(async (req, res) => {
+  try {
+    const baseFilter = buildServiceFilter(req.query);
+    const filter = { ...baseFilter, cameraman_id: req.user.id };
+
+    let page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
+    let skip = (page - 1) * limit;
+
+    const total = await Service.countDocuments(filter);
+    const services = await Service.find(filter)
+      .populate("cameraman_id")
+      .skip(skip)
+      .limit(limit)
+      .exec();
+
+    res.status(200).json({
+      data: services,
+      pagination: {
+        pageIndex: page,
+        pageSize: limit,
+        totalPages: Math.ceil(total / limit),
+        totalResults: total,
+      },
+    });
+  } catch (error) {
+    res
+      .status(res.statusCode || 500)
+      .send(error.message || "Lỗi máy chủ nội bộ");
+  }
+});
+
 // Lấy dịch vụ theo ID
 const getServiceById = asyncHandler(async (req, res) => {
   try {
@@ -339,6 +372,7 @@ const getFreeSlot = asyncHandler(async (req, res) => {
 
 module.exports = {
   getAllServices,
+  getMyServices,
   getServiceById,
   createService,
   updateServiceById,

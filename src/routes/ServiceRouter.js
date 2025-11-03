@@ -3,6 +3,7 @@ const serviceRouter = express.Router();
 const mongoose = require("mongoose");
 const {
   getAllServices,
+  getMyServices,
   getServiceById,
   createService,
   updateServiceById,
@@ -288,6 +289,64 @@ const validateObjectId = (paramName) => (req, res, next) => {
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 serviceRouter.route("/").get(getAllServices).post(validateTokenCameraman, createService);
+
+/**
+ * @swagger
+ * /api/services/my:
+ *   get:
+ *     summary: Get services of logged-in cameraman
+ *     tags: [Services]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *       - in: query
+ *         name: styles
+ *         schema:
+ *           type: string
+ *         description: Filter by styles (comma-separated or multi)
+ *       - in: query
+ *         name: categories
+ *         schema:
+ *           type: string
+ *         description: Filter by categories (comma-separated or multi)
+ *       - in: query
+ *         name: areas
+ *         schema:
+ *           type: string
+ *         description: Filter by areas (comma-separated or multi)
+ *       - in: query
+ *         name: min
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: max
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of cameraman services
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ServiceResponse'
+ *       401:
+ *         description: Unauthorized
+ */
+serviceRouter.get("/my", validateTokenCameraman, getMyServices);
 
 /**
  * @swagger
