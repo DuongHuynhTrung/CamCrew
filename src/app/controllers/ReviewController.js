@@ -202,17 +202,17 @@ const createReview = asyncHandler(async (req, res) => {
     }
     
     // Only allow review if there is at least one completed booking between them
-    const hasCompletedBooking = await Booking.exists({
-      customer_id,
-      cameraman_id,
-      status: BookingStatusEnum.COMPLETED,
-    });
-    if (!hasCompletedBooking) {
-      res.status(400);
-      throw new Error(
-        "Bạn chỉ có thể đánh giá khi đã hoàn thành ít nhất một booking với thợ này"
-      );
-    }
+    // const hasCompletedBooking = await Booking.exists({
+    //   customer_id,
+    //   cameraman_id,
+    //   status: BookingStatusEnum.COMPLETED,
+    // });
+    // if (!hasCompletedBooking) {
+    //   res.status(400);
+    //   throw new Error(
+    //     "Bạn chỉ có thể đánh giá khi đã hoàn thành ít nhất một booking với thợ này"
+    //   );
+    // }
 
     const review = new Review({
       customer_id,
